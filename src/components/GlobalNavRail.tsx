@@ -1,4 +1,4 @@
-import { Home, Bot, Database, User } from 'lucide-react';
+import { Home, Bot, Database, User, FlaskConical } from 'lucide-react';
 
 interface GlobalNavRailProps {
   activeView: string;
@@ -8,6 +8,7 @@ interface GlobalNavRailProps {
 export default function GlobalNavRail({ activeView, onViewChange }: GlobalNavRailProps) {
   const navItems = [
     { id: 'home', icon: Home, label: 'Home' },
+    { id: 'research', icon: FlaskConical, label: 'Research Agent' },
     { id: 'agents', icon: Bot, label: 'Agents' },
     { id: 'rag', icon: Database, label: 'RAG' },
   ];

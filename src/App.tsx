@@ -6,6 +6,7 @@ import AgentControlPanel from './components/AgentControlPanel';
 import ResultCanvas from './components/ResultCanvas';
 import HomePage from './components/HomePage';
 import RAGPage from './components/RAGPage';
+import ResearchAgentPage from './components/ResearchAgentPage';
 
 export interface WorkflowNode {
   id: string;
@@ -85,38 +86,27 @@ export const stepConfigs: Record<string, StepConfig> = {
 };
 
 export default function App() {
-  const [activeView, setActiveView] = useState('agents');
+  const [activeView, setActiveView] = useState('home');
   const [nodes, setNodes] = useState<WorkflowNode[]>([
     { 
       id: 'node-1', 
       number: 1, 
-      title: 'Target Identification', 
-      stepType: 'target', 
+      title: 'Custom Analysis', 
+      stepType: 'custom', 
       status: 'idle', 
       logs: ['> System initialized'], 
-      selectedTools: ['UniProt', 'AlphaFold', 'ChEMBL', 'RDKit'], 
+      selectedTools: [], 
       selectedDocs: [], 
       prompt: '' 
     },
     { 
       id: 'node-2', 
       number: 2, 
-      title: 'Competitor Drug Search', 
-      stepType: 'competitor', 
+      title: 'Final Report', 
+      stepType: 'custom', 
       status: 'idle', 
       logs: ['> System initialized'], 
-      selectedTools: ['UniProt', 'AlphaFold', 'ChEMBL', 'RDKit'], 
-      selectedDocs: [], 
-      prompt: '' 
-    },
-    { 
-      id: 'node-3', 
-      number: 3, 
-      title: 'Structural Analysis', 
-      stepType: 'structural', 
-      status: 'idle', 
-      logs: ['> System initialized'], 
-      selectedTools: ['UniProt', 'AlphaFold', 'ChEMBL', 'RDKit'], 
+      selectedTools: [], 
       selectedDocs: [], 
       prompt: '' 
     },
@@ -246,6 +236,13 @@ export default function App() {
     }, 2500);
   };
 
+  const handleNext = () => {
+    const currentIndex = nodes.findIndex(n => n.id === activeNodeId);
+    if (currentIndex < nodes.length - 1) {
+      setActiveNodeId(nodes[currentIndex + 1].id);
+    }
+  };
+
   const handleRunAll = async () => {
     setIsExecuting(true);
 
@@ -302,20 +299,22 @@ export default function App() {
       
       {activeView === 'rag' && <RAGPage />}
       
+      {activeView === 'research' && <ResearchAgentPage />}
+      
       {activeView === 'agents' && (
         <>
-          {/* Fixed Run All Button - Top Right */}
+          {/* Fixed Run Button - Top Right */}
           <button
-            onClick={handleRunAll}
-            disabled={isExecuting}
-            className={`fixed top-6 right-6 z-50 px-6 py-3 rounded-lg flex items-center gap-3 transition-all shadow-lg ${
+            onClick={handleNext}
+            disabled={isExecuting || !activeNode}
+            className={`fixed bottom-6 right-6 z-50 px-6 py-3 rounded-lg flex items-center gap-3 transition-all shadow-lg ${
               isExecuting 
                 ? 'bg-blue-600 text-white cursor-not-allowed' 
-                : 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-xl'
+                : 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-xl disabled:bg-slate-300 disabled:cursor-not-allowed'
             }`}
           >
             {isExecuting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Play className="w-5 h-5" />}
-            <span className="font-medium">{isExecuting ? 'Running Pipeline...' : 'Run All Steps'}</span>
+            <span className="font-medium">NEXT</span>
           </button>
 
           {/* Column 2: Workflow Editor */}
@@ -351,6 +350,9 @@ export default function App() {
             stepConfig={stepConfig}
             isExecuted={isExecuted}
             isExecuting={isExecuting}
+            prompt={activeNode?.prompt || ''}
+            onPromptChange={(prompt) => handlePromptChange(activeNodeId, prompt)}
+            onExecute={handleExecute}
           />
         </>
       )}

@@ -1,7 +1,7 @@
-import { Activity, Loader2, BarChart3, Microscope, TrendingUp, Package, Atom, FileText } from 'lucide-react';
+import { Activity, Loader2, BarChart3, Microscope, TrendingUp, Package, Atom, FileText, MessageSquare, Send } from 'lucide-react';
 import { WorkflowNode, StepConfig } from '../App';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ScatterChart, Scatter } from 'recharts';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Protein3DViewer from './Protein3DViewer';
 
 interface ResultCanvasProps {
@@ -9,6 +9,10 @@ interface ResultCanvasProps {
   stepConfig?: StepConfig;
   isExecuted: boolean;
   isExecuting: boolean;
+  prompt: string;
+  onPromptChange: (prompt: string) => void;
+  onExecute: () => void;
+  researchQuery?: string;
 }
 
 // ============================================
@@ -723,16 +727,72 @@ function CustomDashboard() {
 // MAIN COMPONENT
 // ============================================
 
-export default function ResultCanvas({ activeNode, stepConfig, isExecuted, isExecuting }: ResultCanvasProps) {
+export default function ResultCanvas({ activeNode, stepConfig, isExecuted, isExecuting, prompt, onPromptChange, onExecute, researchQuery }: ResultCanvasProps) {
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const handleSubmit = () => {
+    if (prompt.trim()) {
+      onExecute(); // Re-execute current step
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
+
   // Executing State
   if (isExecuting) {
     return (
-      <div className="flex-1 bg-slate-50 overflow-y-auto p-6">
-        <div className="flex items-center justify-center h-full">
-          <div className="text-center">
-            <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto" />
-            <p className="text-sm text-slate-600 mt-4 font-medium">Generating Analysis Report...</p>
-            <p className="text-xs text-slate-500 mt-2">Processing {activeNode?.title}</p>
+      <div className="flex-1 bg-slate-50 flex flex-col overflow-hidden">
+        {/* Research Query Header - Fixed */}
+        {researchQuery && (
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200 p-6">
+            <div className="flex items-start gap-3">
+              <MessageSquare className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
+              <div className="flex-1 min-w-0">
+                <h4 className="text-xs font-semibold text-blue-900 uppercase tracking-wider mb-2">
+                  Research Query
+                </h4>
+                <p className="text-lg text-blue-900 leading-relaxed font-medium">
+                  {researchQuery}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Prompt Input - Fixed below Query */}
+        <div className="border-b border-slate-200 bg-white p-4">
+          <div className="flex gap-3">
+            <textarea
+              value={prompt}
+              onChange={(e) => onPromptChange(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={stepConfig?.placeholder || 'Enter analysis parameters...'}
+              rows={3}
+              className="flex-1 px-3 py-2.5 bg-slate-50 border-0 focus:bg-white rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition-colors"
+            />
+            <button
+              onClick={handleSubmit}
+              disabled={!prompt.trim() || isExecuting}
+              className="px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-lg flex items-center justify-center transition-all flex-shrink-0 disabled:cursor-not-allowed"
+            >
+              <Send className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Loading Content */}
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto" />
+              <p className="text-sm text-slate-600 mt-4 font-medium">Generating Analysis Report...</p>
+              <p className="text-xs text-slate-500 mt-2">Processing {activeNode?.title}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -742,26 +802,67 @@ export default function ResultCanvas({ activeNode, stepConfig, isExecuted, isExe
   // Not Executed State
   if (!isExecuted) {
     return (
-      <div className="flex-1 bg-slate-50 overflow-y-auto p-6">
-        <div className="flex items-center justify-center h-full">
-          <div className="text-center max-w-md">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
-              <Activity className="w-8 h-8 text-blue-600" />
-            </div>
-            <h3 className="text-lg font-semibold text-slate-900 mt-4">
-              Ready to Run {activeNode?.title || 'Analysis'}
-            </h3>
-            <p className="text-sm text-slate-600 mt-2">
-              Configure your settings and press <span className="font-semibold">Run</span> to begin
-            </p>
-            <div className="mt-6 flex items-center justify-center gap-4 text-xs text-slate-500">
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                <span>Tools Ready</span>
+      <div className="flex-1 bg-slate-50 flex flex-col overflow-hidden">
+        {/* Research Query Header - Fixed */}
+        {researchQuery && (
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200 p-6">
+            <div className="flex items-start gap-3">
+              <MessageSquare className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
+              <div className="flex-1 min-w-0">
+                <h4 className="text-xs font-semibold text-blue-900 uppercase tracking-wider mb-2">
+                  Research Query
+                </h4>
+                <p className="text-lg text-blue-900 leading-relaxed font-medium">
+                  {researchQuery}
+                </p>
               </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                <span>Step Configured</span>
+            </div>
+          </div>
+        )}
+
+        {/* Prompt Input - Fixed below Query */}
+        <div className="border-b border-slate-200 bg-white p-4">
+          <div className="flex gap-3">
+            <textarea
+              value={prompt}
+              onChange={(e) => onPromptChange(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={stepConfig?.placeholder || 'Enter analysis parameters...'}
+              rows={3}
+              className="flex-1 px-3 py-2.5 bg-slate-50 border-0 focus:bg-white rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition-colors"
+            />
+            <button
+              onClick={handleSubmit}
+              disabled={!prompt.trim()}
+              className="px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-lg flex items-center justify-center transition-all flex-shrink-0 disabled:cursor-not-allowed"
+            >
+              <Send className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Ready Content */}
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center max-w-md">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+                <Activity className="w-8 h-8 text-blue-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900 mt-4">
+                Ready to Run {activeNode?.title || 'Analysis'}
+              </h3>
+              <p className="text-sm text-slate-600 mt-2">
+                Configure your settings and press <span className="font-semibold">Run</span> to begin
+              </p>
+              <div className="mt-6 flex items-center justify-center gap-4 text-xs text-slate-500">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                  <span>Tools Ready</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                  <span>Step Configured</span>
+                </div>
               </div>
             </div>
           </div>
@@ -774,13 +875,54 @@ export default function ResultCanvas({ activeNode, stepConfig, isExecuted, isExe
   const dashboardType = stepConfig?.dashboardType || 'custom';
 
   return (
-    <div className="flex-1 bg-slate-50 overflow-y-auto">
-      <div className="p-6">
-        {dashboardType === 'target' && <TargetDashboard />}
-        {dashboardType === 'competitor' && <CompetitorDashboard />}
-        {dashboardType === 'structural' && <StructuralDashboard />}
-        {dashboardType === 'clinical' && <ClinicalDashboard />}
-        {dashboardType === 'custom' && <CustomDashboard />}
+    <div className="flex-1 bg-slate-50 flex flex-col overflow-hidden">
+      {/* Research Query Header - Fixed */}
+      {researchQuery && (
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200 p-6">
+          <div className="flex items-start gap-3">
+            <MessageSquare className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
+            <div className="flex-1 min-w-0">
+              <h4 className="text-xs font-semibold text-blue-900 uppercase tracking-wider mb-2">
+                Research Query
+              </h4>
+              <p className="text-lg text-blue-900 leading-relaxed font-medium">
+                {researchQuery}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Prompt Input - Fixed below Query */}
+      <div className="border-b border-slate-200 bg-white p-4">
+        <div className="flex gap-3">
+          <textarea
+            value={prompt}
+            onChange={(e) => onPromptChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={stepConfig?.placeholder || 'Enter analysis parameters...'}
+            rows={3}
+            className="flex-1 px-3 py-2.5 bg-slate-50 border-0 focus:bg-white rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition-colors"
+          />
+          <button
+            onClick={handleSubmit}
+            disabled={!prompt.trim() || isExecuting}
+            className="px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-lg flex items-center justify-center transition-all flex-shrink-0 disabled:cursor-not-allowed"
+          >
+            <Send className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Scrollable Dashboard Content */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-6">
+          {dashboardType === 'target' && <TargetDashboard />}
+          {dashboardType === 'competitor' && <CompetitorDashboard />}
+          {dashboardType === 'structural' && <StructuralDashboard />}
+          {dashboardType === 'clinical' && <ClinicalDashboard />}
+          {dashboardType === 'custom' && <CustomDashboard />}
+        </div>
       </div>
     </div>
   );
