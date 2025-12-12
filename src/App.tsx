@@ -1,15 +1,18 @@
 import { useState } from 'react';
+import { Play, Loader2 } from 'lucide-react';
 import GlobalNavRail from './components/GlobalNavRail';
 import WorkflowEditor from './components/WorkflowEditor';
 import AgentControlPanel from './components/AgentControlPanel';
 import ResultCanvas from './components/ResultCanvas';
+import HomePage from './components/HomePage';
+import RAGPage from './components/RAGPage';
 
 export interface WorkflowNode {
   id: string;
   number: number;
   title: string;
   stepType: 'target' | 'competitor' | 'structural' | 'clinical' | 'custom';
-  status: 'idle' | 'complete';
+  status: 'idle' | 'running' | 'complete';
 }
 
 export interface StepConfig {
@@ -99,6 +102,20 @@ export default function App() {
     'node-3': ['UniProt', 'AlphaFold', 'ChEMBL', 'RDKit'],
   });
 
+  // RAG document selection state per step
+  const [stepDocs, setStepDocs] = useState<Record<string, string[]>>({
+    'node-1': [],
+    'node-2': [],
+    'node-3': [],
+  });
+
+  // Prompt state per step
+  const [stepPrompts, setStepPrompts] = useState<Record<string, string>>({
+    'node-1': '',
+    'node-2': '',
+    'node-3': '',
+  });
+
   const handleAddNode = (afterIndex: number) => {
     const newNumber = afterIndex + 2;
     const newNode: WorkflowNode = {
@@ -120,6 +137,8 @@ export default function App() {
     setNodes(renumbered);
     setActiveNodeId(newNode.id);
     setStepTools(prev => ({ ...prev, [newNode.id]: [] }));
+    setStepDocs(prev => ({ ...prev, [newNode.id]: [] }));
+    setStepPrompts(prev => ({ ...prev, [newNode.id]: '' }));
   };
 
   const handleDeleteNode = (nodeId: string) => {
@@ -141,6 +160,16 @@ export default function App() {
     const newStepTools = { ...stepTools };
     delete newStepTools[nodeId];
     setStepTools(newStepTools);
+
+    // Clean up document state
+    const newStepDocs = { ...stepDocs };
+    delete newStepDocs[nodeId];
+    setStepDocs(newStepDocs);
+
+    // Clean up prompt state
+    const newStepPrompts = { ...stepPrompts };
+    delete newStepPrompts[nodeId];
+    setStepPrompts(newStepPrompts);
   };
 
   const handleUpdateNodeTitle = (nodeId: string, newTitle: string) => {
@@ -170,11 +199,29 @@ export default function App() {
     });
   };
 
+  const handleDocToggle = (nodeId: string, docId: string) => {
+    setStepDocs(prev => {
+      const currentDocs = prev[nodeId] || [];
+      const newDocs = currentDocs.includes(docId)
+        ? currentDocs.filter(d => d !== docId)
+        : [...currentDocs, docId];
+      return { ...prev, [nodeId]: newDocs };
+    });
+  };
+
+  const handlePromptChange = (nodeId: string, prompt: string) => {
+    setStepPrompts(prev => ({ ...prev, [nodeId]: prompt }));
+  };
+
   const handleExecute = () => {
     const activeNode = nodes.find(n => n.id === activeNodeId);
     if (!activeNode) return;
 
     setIsExecuting(true);
+    setNodes(nodes.map(node =>
+      node.id === activeNodeId ? { ...node, status: 'running' } : node
+    ));
+    
     setLogs(prev => [
       ...prev,
       `> [${activeNode.title}] Starting execution...`,
@@ -201,6 +248,68 @@ export default function App() {
     }, 2500);
   };
 
+  const handleRunAll = async () => {
+    setIsExecuting(true);
+    setLogs(prev => [
+      ...prev,
+      '> [Pipeline] Starting full pipeline execution...',
+    ]);
+
+    // Execute each step sequentially
+    for (let i = 0; i < nodes.length; i++) {
+      const node = nodes[i];
+      
+      // Set current step to running
+      setNodes(prevNodes => prevNodes.map(n =>
+        n.id === node.id ? { ...n, status: 'running' } : n
+      ));
+      
+      setActiveNodeId(node.id);
+      
+      setLogs(prev => [
+        ...prev,
+        `> [${node.title}] Starting execution...`,
+      ]);
+
+      // Simulate processing
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      setLogs(prev => [
+        ...prev,
+        `> [${node.title}] Processing data with ${stepTools[node.id]?.length || 0} tools...`,
+      ]);
+
+      if (i > 0) {
+        const prevNode = nodes[i - 1];
+        setLogs(prev => [
+          ...prev,
+          `> [${node.title}] Using context from ${prevNode.title}`,
+        ]);
+      }
+
+      // Simulate completion
+      await new Promise(resolve => setTimeout(resolve, 1700));
+      
+      setLogs(prev => [
+        ...prev,
+        `> [${node.title}] ✓ Execution complete`,
+      ]);
+
+      setExecutedSteps(prev => new Set([...prev, node.id]));
+      
+      setNodes(prevNodes => prevNodes.map(n =>
+        n.id === node.id ? { ...n, status: 'complete' } : n
+      ));
+    }
+
+    setLogs(prev => [
+      ...prev,
+      '> [Pipeline] ✓ All steps completed successfully',
+    ]);
+    
+    setIsExecuting(false);
+  };
+
   const activeNode = nodes.find(n => n.id === activeNodeId);
   const previousNode = activeNode ? nodes.find(n => n.number === activeNode.number - 1) : undefined;
   const stepConfig = activeNode ? stepConfigs[activeNode.stepType] : undefined;
@@ -211,36 +320,63 @@ export default function App() {
       {/* Column 1: Global Nav Rail */}
       <GlobalNavRail activeView={activeView} onViewChange={setActiveView} />
 
-      {/* Column 2: Workflow Editor */}
-      <WorkflowEditor
-        nodes={nodes}
-        activeNodeId={activeNodeId}
-        onNodeClick={setActiveNodeId}
-        onAddNode={handleAddNode}
-        onDeleteNode={handleDeleteNode}
-        onUpdateNodeTitle={handleUpdateNodeTitle}
-        onChangeStepType={handleChangeStepType}
-      />
+      {/* Conditional rendering based on activeView */}
+      {activeView === 'home' && <HomePage />}
+      
+      {activeView === 'rag' && <RAGPage />}
+      
+      {activeView === 'agents' && (
+        <>
+          {/* Fixed Run All Button - Top Right */}
+          <button
+            onClick={handleRunAll}
+            disabled={isExecuting}
+            className={`fixed top-6 right-6 z-50 px-6 py-3 rounded-lg flex items-center gap-3 transition-all shadow-lg ${
+              isExecuting 
+                ? 'bg-blue-600 text-white cursor-not-allowed' 
+                : 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-xl'
+            }`}
+          >
+            {isExecuting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Play className="w-5 h-5" />}
+            <span className="font-medium">{isExecuting ? 'Running Pipeline...' : 'Run All Steps'}</span>
+          </button>
 
-      {/* Column 3: Agent Control Panel */}
-      <AgentControlPanel
-        activeNode={activeNode}
-        previousNode={previousNode}
-        stepConfig={stepConfig}
-        selectedTools={stepTools[activeNodeId] || []}
-        logs={logs}
-        onToolToggle={(tool) => handleToolToggle(activeNodeId, tool)}
-        onExecute={handleExecute}
-        isExecuting={isExecuting}
-      />
+          {/* Column 2: Workflow Editor */}
+          <WorkflowEditor
+            nodes={nodes}
+            activeNodeId={activeNodeId}
+            onNodeClick={setActiveNodeId}
+            onAddNode={handleAddNode}
+            onDeleteNode={handleDeleteNode}
+            onUpdateNodeTitle={handleUpdateNodeTitle}
+            onChangeStepType={handleChangeStepType}
+          />
 
-      {/* Column 4: Result Canvas */}
-      <ResultCanvas 
-        activeNode={activeNode}
-        stepConfig={stepConfig}
-        isExecuted={isExecuted}
-        isExecuting={isExecuting}
-      />
+          {/* Column 3: Agent Control Panel */}
+          <AgentControlPanel
+            activeNode={activeNode}
+            previousNode={previousNode}
+            stepConfig={stepConfig}
+            selectedTools={stepTools[activeNodeId] || []}
+            selectedDocs={stepDocs[activeNodeId] || []}
+            prompt={stepPrompts[activeNodeId] || ''}
+            logs={logs}
+            onToolToggle={(tool) => handleToolToggle(activeNodeId, tool)}
+            onDocToggle={(docId) => handleDocToggle(activeNodeId, docId)}
+            onPromptChange={(prompt) => handlePromptChange(activeNodeId, prompt)}
+            onExecute={handleExecute}
+            isExecuting={isExecuting}
+          />
+
+          {/* Column 4: Result Canvas */}
+          <ResultCanvas 
+            activeNode={activeNode}
+            stepConfig={stepConfig}
+            isExecuted={isExecuted}
+            isExecuting={isExecuting}
+          />
+        </>
+      )}
     </div>
   );
 }

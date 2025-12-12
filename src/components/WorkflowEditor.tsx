@@ -1,4 +1,4 @@
-import { Plus, Trash2, Circle, CheckCircle2, FlaskConical, Pill, Atom, FileText } from 'lucide-react';
+import { Plus, Trash2, Circle, CheckCircle2, FlaskConical, Pill, Atom, FileText, Loader2 } from 'lucide-react';
 import { WorkflowNode } from '../App';
 import { useState } from 'react';
 
@@ -75,7 +75,9 @@ export default function WorkflowEditor({
                   <div className="flex items-start gap-3">
                     {/* Status Icon */}
                     <div className="flex-shrink-0 mt-0.5">
-                      {node.status === 'complete' ? (
+                      {node.status === 'running' ? (
+                        <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
+                      ) : node.status === 'complete' ? (
                         <CheckCircle2 className="w-5 h-5 text-emerald-500" />
                       ) : node.id === activeNodeId ? (
                         <div className="w-5 h-5 rounded-full bg-blue-600 flex items-center justify-center">
@@ -103,7 +105,12 @@ export default function WorkflowEditor({
                           <span className="capitalize">{node.stepType}</span>
                         </div>
 
-                        {node.id === activeNodeId && (
+                        {node.status === 'running' && (
+                          <span className="px-2 py-0.5 bg-blue-100 border border-blue-200 rounded text-xs text-blue-700">
+                            Running...
+                          </span>
+                        )}
+                        {node.id === activeNodeId && node.status !== 'running' && (
                           <span className="px-2 py-0.5 bg-blue-100 border border-blue-200 rounded text-xs text-blue-700">
                             Active
                           </span>
