@@ -100,7 +100,7 @@ export default function HomePage() {
     <div className="flex h-screen bg-slate-50 overflow-hidden">
       {/* Main Content Area */}
       <div className="flex-1 overflow-hidden">
-        <div className="h-full px-[300px] py-[24px] flex flex-col max-w-[2000px] mx-auto w-full">
+        <div className="h-full flex flex-col max-w-[2000px] w-full px-[300px] py-[0px]">
           {/* Section A: Global Search */}
           <div className="mb-6 flex justify-center">
             <div className="w-full max-w-4xl relative">
