@@ -71,17 +71,6 @@ export default function AgentControlPanel({
             </div>
           </div>
 
-          {/* Current Step Info */}
-          <div>
-            <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
-              Current Step
-            </label>
-            <div className="mt-2 p-3 bg-slate-50 rounded-lg border border-slate-200">
-              <p className="text-sm text-slate-900 font-medium">{activeNode.title}</p>
-              <p className="text-xs text-slate-500 mt-1">Step {activeNode.number} • {activeNode.stepType}</p>
-            </div>
-          </div>
-
           {/* Prompt Input */}
           <div>
             <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
@@ -99,29 +88,34 @@ export default function AgentControlPanel({
           {/* MCP Tools Selection - Dynamic based on step type */}
           <div>
             <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
-              MCP Tools for {stepConfig.title}
+              MCP Servers
             </label>
-            <div className="mt-2 space-y-2">
+            <p className="text-xs text-slate-500 mt-1 mb-2">Select data sources for analysis</p>
+            <div className="mt-2 grid grid-cols-2 gap-1.5">
               {stepConfig.tools.map((tool) => {
                 const isSelected = selectedTools.includes(tool.id);
                 return (
                   <label
                     key={tool.id}
-                    className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                    className={`group relative flex items-center gap-2 px-2.5 py-2 rounded-lg border cursor-pointer transition-all ${
                       isSelected
                         ? 'bg-blue-50 border-blue-300'
                         : 'bg-white border-slate-200 hover:border-slate-300'
                     }`}
+                    title={tool.description}
                   >
                     <input
                       type="checkbox"
                       checked={isSelected}
                       onChange={() => onToolToggle(tool.id)}
-                      className="mt-0.5 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                      className="w-3.5 h-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 flex-shrink-0"
                     />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-slate-900">{tool.name}</p>
-                      <p className="text-xs text-slate-500 mt-0.5">{tool.description}</p>
+                    <p className="text-xs font-medium text-slate-900 truncate">{tool.name}</p>
+                    
+                    {/* Tooltip on hover */}
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-900 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none">
+                      {tool.description}
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900"></div>
                     </div>
                   </label>
                 );
@@ -155,19 +149,12 @@ export default function AgentControlPanel({
       <div className="p-6 border-t border-slate-200 bg-white">
         <button
           onClick={onExecute}
-          disabled={isExecuting || selectedTools.length === 0}
+          disabled={isExecuting}
           className="w-full px-4 py-3.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm text-sm font-medium"
         >
           <Play className="w-4 h-4" />
           {isExecuting ? 'Executing...' : `Run ${activeNode.title}`}
         </button>
-        
-        {selectedTools.length === 0 && (
-          <div className="mt-2 flex items-start gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">
-            <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-            <span>Select at least one MCP tool to execute</span>
-          </div>
-        )}
       </div>
     </div>
   );

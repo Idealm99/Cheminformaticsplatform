@@ -1,4 +1,4 @@
-import { Activity, Loader2, BarChart3, Microscope, TrendingUp, Package, Atom } from 'lucide-react';
+import { Activity, Loader2, BarChart3, Microscope, TrendingUp, Package, Atom, FileText } from 'lucide-react';
 import { WorkflowNode, StepConfig } from '../App';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ScatterChart, Scatter } from 'recharts';
 
@@ -48,6 +48,43 @@ const chemicalSpaceData = [
   { x: 4.9, y: 5.5, compound: 'Drug H', cluster: 'C' },
   { x: 8.2, y: 2.5, compound: 'Drug I', cluster: 'D' },
   { x: 8.5, y: 2.8, compound: 'Drug J', cluster: 'D' },
+];
+
+// Clinical Data Analysis
+const clinicalTrials = [
+  { id: 'NCT05234567', title: 'Phase III Study of STAT6 Inhibitor in Atopic Dermatitis', phase: 'Phase III', status: 'Recruiting', participants: 450, sponsor: 'Novartis' },
+  { id: 'NCT05123456', title: 'Safety and Efficacy of Anti-IL4R in Severe Asthma', phase: 'Phase II', status: 'Active', participants: 280, sponsor: 'Regeneron' },
+  { id: 'NCT04987654', title: 'Long-term Safety Study of Dupilumab', phase: 'Phase IV', status: 'Completed', participants: 620, sponsor: 'Sanofi' },
+  { id: 'NCT04876543', title: 'STAT6 Pathway Inhibition in Allergic Rhinitis', phase: 'Phase II', status: 'Recruiting', participants: 180, sponsor: 'AstraZeneca' },
+  { id: 'NCT04765432', title: 'Combination Therapy in Eosinophilic Esophagitis', phase: 'Phase I', status: 'Enrolling', participants: 60, sponsor: 'Eli Lilly' },
+];
+
+const trialPhaseDistribution = [
+  { phase: 'Phase I', count: 8 },
+  { phase: 'Phase II', count: 15 },
+  { phase: 'Phase III', count: 12 },
+  { phase: 'Phase IV', count: 5 },
+];
+
+const adverseEvents = [
+  { category: 'Injection Site Reactions', count: 245 },
+  { category: 'Headache', count: 189 },
+  { category: 'Conjunctivitis', count: 156 },
+  { category: 'Upper Respiratory Infections', count: 134 },
+  { category: 'Eosinophilia', count: 98 },
+  { category: 'Arthralgia', count: 76 },
+];
+
+const patentTimeline = [
+  { year: 2015, patents: 12 },
+  { year: 2016, patents: 18 },
+  { year: 2017, patents: 24 },
+  { year: 2018, patents: 31 },
+  { year: 2019, patents: 28 },
+  { year: 2020, patents: 35 },
+  { year: 2021, patents: 42 },
+  { year: 2022, patents: 38 },
+  { year: 2023, patents: 29 },
 ];
 
 // ============================================
@@ -448,6 +485,214 @@ function StructuralDashboard() {
   );
 }
 
+function ClinicalDashboard() {
+  return (
+    <div className="space-y-6">
+      {/* AI Analysis Report */}
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+        <div className="flex items-start gap-3 mb-4">
+          <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <TrendingUp className="w-4 h-4 text-emerald-600" />
+          </div>
+          <div>
+            <h3 className="text-base font-semibold text-slate-900">Clinical Trial Analysis</h3>
+            <p className="text-xs text-slate-500 mt-1">Clinical Data Report</p>
+          </div>
+        </div>
+
+        <div className="prose prose-sm max-w-none">
+          <p className="text-sm text-slate-700 leading-relaxed">
+            The clinical trial analysis reveals <strong>5 active trials</strong> targeting the IL-4/IL-13/STAT6 
+            pathway for allergic diseases. The trials cover various phases, with <strong>15 in Phase II</strong> 
+            and 12 in Phase III, indicating a robust clinical development pipeline.
+          </p>
+
+          <p className="text-sm text-slate-700 leading-relaxed mt-3">
+            <strong>Dupilumab</strong> (Sanofi/Regeneron) has completed a Phase IV long-term safety study 
+            involving 620 participants, demonstrating sustained efficacy and safety. The trial data 
+            supports the drug's market position and provides valuable insights into long-term outcomes.
+          </p>
+
+          <p className="text-sm text-slate-700 leading-relaxed mt-3">
+            Adverse event analysis shows that <strong>Injection Site Reactions</strong> are the most common 
+            side effect, occurring in 245 participants across all trials. Other notable adverse events 
+            include <strong>Headache</strong> (189), <strong>Conjunctivitis</strong> (156), and 
+            <strong>Upper Respiratory Infections</strong> (134).
+          </p>
+
+          <p className="text-sm text-slate-700 leading-relaxed mt-3">
+            Patent analysis shows a steady increase in patent filings, with <strong>42 patents</strong> 
+            filed in 2021, indicating ongoing innovation and protection of intellectual property.
+          </p>
+        </div>
+
+        <div className="mt-4 pt-4 border-t border-slate-200 flex items-center gap-2 text-xs text-slate-500">
+          <span className="px-2 py-1 bg-emerald-50 text-emerald-700 rounded border border-emerald-200">ClinicalTrials.gov</span>
+          <span className="px-2 py-1 bg-emerald-50 text-emerald-700 rounded border border-emerald-200">Patents</span>
+        </div>
+      </div>
+
+      {/* Key Metrics Cards */}
+      <div className="grid grid-cols-3 gap-4">
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Package className="w-4 h-4 text-blue-600" />
+            <p className="text-xs font-semibold text-slate-600">Total Trials</p>
+          </div>
+          <p className="text-2xl font-bold text-slate-900">5</p>
+          <p className="text-xs text-slate-500 mt-1">Active development</p>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <TrendingUp className="w-4 h-4 text-emerald-600" />
+            <p className="text-xs font-semibold text-slate-600">Avg Phase</p>
+          </div>
+          <p className="text-2xl font-bold text-slate-900">Phase II</p>
+          <p className="text-xs text-slate-500 mt-1">Clinical stage</p>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Microscope className="w-4 h-4 text-purple-600" />
+            <p className="text-xs font-semibold text-slate-600">Modality Split</p>
+          </div>
+          <p className="text-2xl font-bold text-slate-900">67%</p>
+          <p className="text-xs text-slate-500 mt-1">Antibodies</p>
+        </div>
+      </div>
+
+      {/* Visual Dashboard */}
+      <div className="grid grid-cols-3 gap-6">
+        {/* Trial Table */}
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 col-span-2">
+          <div className="flex items-center gap-2 mb-4">
+            <Package className="w-4 h-4 text-emerald-600" />
+            <h4 className="text-sm font-semibold text-slate-900">Clinical Trials</h4>
+          </div>
+          <div className="overflow-hidden">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-slate-200">
+                  <th className="text-left py-2 text-slate-600 font-semibold">Trial ID</th>
+                  <th className="text-left py-2 text-slate-600 font-semibold">Title</th>
+                  <th className="text-left py-2 text-slate-600 font-semibold">Phase</th>
+                  <th className="text-left py-2 text-slate-600 font-semibold">Status</th>
+                  <th className="text-left py-2 text-slate-600 font-semibold">Participants</th>
+                  <th className="text-left py-2 text-slate-600 font-semibold">Sponsor</th>
+                </tr>
+              </thead>
+              <tbody>
+                {clinicalTrials.map((trial) => (
+                  <tr key={trial.id} className="border-b border-slate-100 last:border-0">
+                    <td className="py-2.5 text-slate-900 font-medium">{trial.id}</td>
+                    <td className="py-2.5 text-slate-700">{trial.title}</td>
+                    <td className="py-2.5">
+                      <span className={`px-2 py-0.5 rounded text-xs ${
+                        trial.phase === 'Phase III' 
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                          : trial.phase === 'Phase II'
+                          ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                          : trial.phase === 'Phase I'
+                          ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                          : 'bg-slate-50 text-slate-700 border border-slate-200'
+                      }`}>
+                        {trial.phase}
+                      </span>
+                    </td>
+                    <td className="py-2.5 text-slate-700">{trial.status}</td>
+                    <td className="py-2.5 text-slate-700">{trial.participants}</td>
+                    <td className="py-2.5 text-slate-700">{trial.sponsor}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Pie Chart */}
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 col-span-1">
+          <div className="flex items-center gap-2 mb-4">
+            <BarChart3 className="w-4 h-4 text-emerald-600" />
+            <h4 className="text-sm font-semibold text-slate-900">Trial Phase Distribution</h4>
+          </div>
+          <ResponsiveContainer width="100%" height={200}>
+            <PieChart>
+              <Pie
+                data={trialPhaseDistribution}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={({ name, value }) => `${name} ${value}`}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="count"
+              >
+                {trialPhaseDistribution.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.phase === 'Phase I' ? '#3b82f6' : entry.phase === 'Phase II' ? '#10b981' : entry.phase === 'Phase III' ? '#f59e0b' : '#ef4444'} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Adverse Events Bar Chart */}
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <BarChart3 className="w-4 h-4 text-emerald-600" />
+          <h4 className="text-sm font-semibold text-slate-900">Adverse Events</h4>
+        </div>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart
+            data={adverseEvents}
+            margin={{
+              top: 5,
+              right: 30,
+              left: 20,
+              bottom: 5,
+            }}
+          >
+            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+            <XAxis dataKey="category" tick={{ fontSize: 11, fill: '#64748b' }} />
+            <YAxis tick={{ fontSize: 11, fill: '#64748b' }} />
+            <Tooltip />
+            <Legend wrapperStyle={{ fontSize: '11px' }} />
+            <Bar dataKey="count" fill="#3b82f6" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Patent Timeline Bar Chart */}
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <BarChart3 className="w-4 h-4 text-emerald-600" />
+          <h4 className="text-sm font-semibold text-slate-900">Patent Timeline</h4>
+        </div>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart
+            data={patentTimeline}
+            margin={{
+              top: 5,
+              right: 30,
+              left: 20,
+              bottom: 5,
+            }}
+          >
+            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+            <XAxis dataKey="year" tick={{ fontSize: 11, fill: '#64748b' }} />
+            <YAxis tick={{ fontSize: 11, fill: '#64748b' }} />
+            <Tooltip />
+            <Legend wrapperStyle={{ fontSize: '11px' }} />
+            <Bar dataKey="patents" fill="#10b981" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}
+
 function CustomDashboard() {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
@@ -527,6 +772,7 @@ export default function ResultCanvas({ activeNode, stepConfig, isExecuted, isExe
         {dashboardType === 'target' && <TargetDashboard />}
         {dashboardType === 'competitor' && <CompetitorDashboard />}
         {dashboardType === 'structural' && <StructuralDashboard />}
+        {dashboardType === 'clinical' && <ClinicalDashboard />}
         {dashboardType === 'custom' && <CustomDashboard />}
       </div>
     </div>

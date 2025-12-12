@@ -8,7 +8,7 @@ export interface WorkflowNode {
   id: string;
   number: number;
   title: string;
-  stepType: 'target' | 'competitor' | 'structural' | 'custom';
+  stepType: 'target' | 'competitor' | 'structural' | 'clinical' | 'custom';
   status: 'idle' | 'complete';
 }
 
@@ -17,50 +17,61 @@ export interface StepConfig {
   contextBadge: string;
   tools: Array<{ id: string; name: string; description: string; defaultChecked: boolean }>;
   placeholder: string;
-  dashboardType: 'target' | 'competitor' | 'structural' | 'custom';
+  dashboardType: 'target' | 'competitor' | 'structural' | 'clinical' | 'custom';
 }
+
+// Global MCP Server list - same for all steps
+const mcpServers = [
+  { id: 'UniProt', name: 'UniProt', description: 'Protein sequence and functional information', defaultChecked: true },
+  { id: 'InterPro', name: 'InterPro', description: 'Protein families and domains', defaultChecked: false },
+  { id: 'RCSB_PDB', name: 'RCSB PDB', description: 'Protein Data Bank structures', defaultChecked: false },
+  { id: 'AlphaFold', name: 'AlphaFold', description: 'Predicted protein structures', defaultChecked: true },
+  { id: 'ChEMBL', name: 'ChEMBL', description: 'Bioactive drug-like molecules', defaultChecked: true },
+  { id: 'PubChem', name: 'PubChem', description: 'Chemical compounds database', defaultChecked: false },
+  { id: 'SureChEMBL', name: 'SureChEMBL', description: 'Patent chemistry data', defaultChecked: false },
+  { id: 'ClinicalTrials', name: 'ClinicalTrials.gov', description: 'Clinical trial registry', defaultChecked: false },
+  { id: 'openFDA', name: 'openFDA', description: 'FDA adverse events and labels', defaultChecked: false },
+  { id: 'RDKit', name: 'RDKit', description: 'Cheminformatics and molecular modeling', defaultChecked: true },
+  { id: 'GooglePatents', name: 'Google Patents', description: 'Patent search and analysis', defaultChecked: false },
+];
 
 // Step configuration mapping
 export const stepConfigs: Record<string, StepConfig> = {
   target: {
     title: 'Target Identification',
     contextBadge: 'Start of Pipeline',
-    tools: [
-      { id: 'UniProt', name: 'UniProt', description: 'Protein sequence database', defaultChecked: true },
-      { id: 'AlphaFold', name: 'AlphaFold', description: 'Protein structure prediction', defaultChecked: true },
-      { id: 'PDB', name: 'PDB', description: 'Protein Data Bank', defaultChecked: false },
-    ],
+    tools: mcpServers,
     placeholder: 'Enter Target Gene Name (e.g., STAT6)...',
     dashboardType: 'target',
   },
   competitor: {
     title: 'Competitor Drug Search',
     contextBadge: '🔗 Input: Target Protein Data (from Step 1)',
-    tools: [
-      { id: 'ChEMBL', name: 'ChEMBL', description: 'Bioactive molecules database', defaultChecked: true },
-      { id: 'Patents', name: 'Patents', description: 'Patent database search', defaultChecked: true },
-      { id: 'FDA', name: 'FDA', description: 'FDA drug approvals', defaultChecked: false },
-    ],
+    tools: mcpServers,
     placeholder: 'Set criteria for competitor search (e.g., Phase 2+)...',
     dashboardType: 'competitor',
   },
   structural: {
     title: 'Structural Analysis',
     contextBadge: '🔗 Input: Competitor Drug List (from Step 2)',
-    tools: [
-      { id: 'RDKit', name: 'RDKit', description: 'Cheminformatics toolkit', defaultChecked: true },
-      { id: 'PyMol', name: 'PyMol', description: 'Molecular visualization', defaultChecked: false },
-    ],
+    tools: mcpServers,
     placeholder: 'Define clustering parameters...',
     dashboardType: 'structural',
+  },
+  clinical: {
+    title: 'Clinical Research Search',
+    contextBadge: '🔗 Input: Data from previous step',
+    tools: mcpServers.map(server => ({
+      ...server,
+      defaultChecked: ['ClinicalTrials', 'openFDA', 'GooglePatents'].includes(server.id)
+    })),
+    placeholder: 'Enter search criteria (e.g., therapeutic area, indication)...',
+    dashboardType: 'clinical',
   },
   custom: {
     title: 'Custom Analysis',
     contextBadge: '🔗 Input: Data from previous step',
-    tools: [
-      { id: 'Custom1', name: 'Custom Tool 1', description: 'General purpose tool', defaultChecked: true },
-      { id: 'Custom2', name: 'Custom Tool 2', description: 'Analysis tool', defaultChecked: false },
-    ],
+    tools: mcpServers,
     placeholder: 'Enter analysis parameters...',
     dashboardType: 'custom',
   },
@@ -83,9 +94,9 @@ export default function App() {
 
   // Tool selection state per step
   const [stepTools, setStepTools] = useState<Record<string, string[]>>({
-    'node-1': ['UniProt', 'AlphaFold'],
-    'node-2': ['ChEMBL', 'Patents'],
-    'node-3': ['RDKit'],
+    'node-1': ['UniProt', 'AlphaFold', 'ChEMBL', 'RDKit'],
+    'node-2': ['UniProt', 'AlphaFold', 'ChEMBL', 'RDKit'],
+    'node-3': ['UniProt', 'AlphaFold', 'ChEMBL', 'RDKit'],
   });
 
   const handleAddNode = (afterIndex: number) => {
@@ -138,7 +149,7 @@ export default function App() {
     ));
   };
 
-  const handleChangeStepType = (nodeId: string, newType: 'target' | 'competitor' | 'structural' | 'custom') => {
+  const handleChangeStepType = (nodeId: string, newType: 'target' | 'competitor' | 'structural' | 'clinical' | 'custom') => {
     setNodes(nodes.map(node => 
       node.id === nodeId ? { ...node, stepType: newType } : node
     ));

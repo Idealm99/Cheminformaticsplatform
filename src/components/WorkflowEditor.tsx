@@ -1,4 +1,4 @@
-import { Plus, Trash2, Circle, CheckCircle2, FlaskConical, Pill, Atom } from 'lucide-react';
+import { Plus, Trash2, Circle, CheckCircle2, FlaskConical, Pill, Atom, FileText } from 'lucide-react';
 import { WorkflowNode } from '../App';
 import { useState } from 'react';
 
@@ -9,13 +9,14 @@ interface WorkflowEditorProps {
   onAddNode: (afterIndex: number) => void;
   onDeleteNode: (nodeId: string) => void;
   onUpdateNodeTitle: (nodeId: string, newTitle: string) => void;
-  onChangeStepType: (nodeId: string, newType: 'target' | 'competitor' | 'structural' | 'custom') => void;
+  onChangeStepType: (nodeId: string, newType: 'target' | 'competitor' | 'structural' | 'clinical' | 'custom') => void;
 }
 
 const stepTypeIcons = {
   target: FlaskConical,
   competitor: Pill,
   structural: Atom,
+  clinical: FileText,
   custom: Circle,
 };
 
@@ -95,6 +96,7 @@ export default function WorkflowEditor({
                           node.stepType === 'target' ? 'bg-purple-50 text-purple-700 border border-purple-200' :
                           node.stepType === 'competitor' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
                           node.stepType === 'structural' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                          node.stepType === 'clinical' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
                           'bg-slate-50 text-slate-700 border border-slate-200'
                         }`}>
                           <StepIcon className="w-3 h-3" />
@@ -141,7 +143,7 @@ export default function WorkflowEditor({
                       {/* Step Type Selector (show on hover/active) */}
                       {(hoveredNodeId === node.id || node.id === activeNodeId) && editingNodeId !== node.id && (
                         <div className="mt-2 flex gap-1">
-                          {(['target', 'competitor', 'structural', 'custom'] as const).map((type) => {
+                          {(['target', 'competitor', 'structural', 'clinical', 'custom'] as const).map((type) => {
                             const Icon = stepTypeIcons[type];
                             return (
                               <button
