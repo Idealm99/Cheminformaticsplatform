@@ -13,6 +13,10 @@ export interface WorkflowNode {
   title: string;
   stepType: 'target' | 'competitor' | 'structural' | 'clinical' | 'custom';
   status: 'idle' | 'running' | 'complete';
+  logs: string[];
+  selectedTools: string[];
+  selectedDocs: string[];
+  prompt: string;
 }
 
 export interface StepConfig {
@@ -83,38 +87,43 @@ export const stepConfigs: Record<string, StepConfig> = {
 export default function App() {
   const [activeView, setActiveView] = useState('agents');
   const [nodes, setNodes] = useState<WorkflowNode[]>([
-    { id: 'node-1', number: 1, title: 'Target Identification', stepType: 'target', status: 'idle' },
-    { id: 'node-2', number: 2, title: 'Competitor Drug Search', stepType: 'competitor', status: 'idle' },
-    { id: 'node-3', number: 3, title: 'Structural Analysis', stepType: 'structural', status: 'idle' },
+    { 
+      id: 'node-1', 
+      number: 1, 
+      title: 'Target Identification', 
+      stepType: 'target', 
+      status: 'idle', 
+      logs: ['> System initialized'], 
+      selectedTools: ['UniProt', 'AlphaFold', 'ChEMBL', 'RDKit'], 
+      selectedDocs: [], 
+      prompt: '' 
+    },
+    { 
+      id: 'node-2', 
+      number: 2, 
+      title: 'Competitor Drug Search', 
+      stepType: 'competitor', 
+      status: 'idle', 
+      logs: ['> System initialized'], 
+      selectedTools: ['UniProt', 'AlphaFold', 'ChEMBL', 'RDKit'], 
+      selectedDocs: [], 
+      prompt: '' 
+    },
+    { 
+      id: 'node-3', 
+      number: 3, 
+      title: 'Structural Analysis', 
+      stepType: 'structural', 
+      status: 'idle', 
+      logs: ['> System initialized'], 
+      selectedTools: ['UniProt', 'AlphaFold', 'ChEMBL', 'RDKit'], 
+      selectedDocs: [], 
+      prompt: '' 
+    },
   ]);
   const [activeNodeId, setActiveNodeId] = useState('node-1');
   const [executedSteps, setExecutedSteps] = useState<Set<string>>(new Set());
   const [isExecuting, setIsExecuting] = useState(false);
-  const [logs, setLogs] = useState<string[]>([
-    '> [System] Scientific workflow platform initialized',
-    '> [System] Ready to begin analysis',
-  ]);
-
-  // Tool selection state per step
-  const [stepTools, setStepTools] = useState<Record<string, string[]>>({
-    'node-1': ['UniProt', 'AlphaFold', 'ChEMBL', 'RDKit'],
-    'node-2': ['UniProt', 'AlphaFold', 'ChEMBL', 'RDKit'],
-    'node-3': ['UniProt', 'AlphaFold', 'ChEMBL', 'RDKit'],
-  });
-
-  // RAG document selection state per step
-  const [stepDocs, setStepDocs] = useState<Record<string, string[]>>({
-    'node-1': [],
-    'node-2': [],
-    'node-3': [],
-  });
-
-  // Prompt state per step
-  const [stepPrompts, setStepPrompts] = useState<Record<string, string>>({
-    'node-1': '',
-    'node-2': '',
-    'node-3': '',
-  });
 
   const handleAddNode = (afterIndex: number) => {
     const newNumber = afterIndex + 2;
@@ -124,6 +133,10 @@ export default function App() {
       title: `Step ${newNumber}`,
       stepType: 'custom',
       status: 'idle',
+      logs: ['> System initialized'],
+      selectedTools: [],
+      selectedDocs: [],
+      prompt: '',
     };
 
     const updatedNodes = [...nodes];
@@ -136,9 +149,6 @@ export default function App() {
 
     setNodes(renumbered);
     setActiveNodeId(newNode.id);
-    setStepTools(prev => ({ ...prev, [newNode.id]: [] }));
-    setStepDocs(prev => ({ ...prev, [newNode.id]: [] }));
-    setStepPrompts(prev => ({ ...prev, [newNode.id]: '' }));
   };
 
   const handleDeleteNode = (nodeId: string) => {
@@ -155,21 +165,6 @@ export default function App() {
     if (activeNodeId === nodeId) {
       setActiveNodeId(renumbered[0]?.id || '');
     }
-
-    // Clean up tool state
-    const newStepTools = { ...stepTools };
-    delete newStepTools[nodeId];
-    setStepTools(newStepTools);
-
-    // Clean up document state
-    const newStepDocs = { ...stepDocs };
-    delete newStepDocs[nodeId];
-    setStepDocs(newStepDocs);
-
-    // Clean up prompt state
-    const newStepPrompts = { ...stepPrompts };
-    delete newStepPrompts[nodeId];
-    setStepPrompts(newStepPrompts);
   };
 
   const handleUpdateNodeTitle = (nodeId: string, newTitle: string) => {
@@ -179,38 +174,50 @@ export default function App() {
   };
 
   const handleChangeStepType = (nodeId: string, newType: 'target' | 'competitor' | 'structural' | 'clinical' | 'custom') => {
-    setNodes(nodes.map(node => 
-      node.id === nodeId ? { ...node, stepType: newType } : node
-    ));
-
-    // Reset tools to defaults for new type
     const config = stepConfigs[newType];
     const defaultTools = config.tools.filter(t => t.defaultChecked).map(t => t.id);
-    setStepTools(prev => ({ ...prev, [nodeId]: defaultTools }));
+    
+    setNodes(nodes.map(node => 
+      node.id === nodeId ? { ...node, stepType: newType, selectedTools: defaultTools } : node
+    ));
   };
 
   const handleToolToggle = (nodeId: string, tool: string) => {
-    setStepTools(prev => {
-      const currentTools = prev[nodeId] || [];
-      const newTools = currentTools.includes(tool)
-        ? currentTools.filter(t => t !== tool)
-        : [...currentTools, tool];
-      return { ...prev, [nodeId]: newTools };
-    });
+    setNodes(nodes.map(node => {
+      if (node.id !== nodeId) return node;
+      
+      const newTools = node.selectedTools.includes(tool)
+        ? node.selectedTools.filter(t => t !== tool)
+        : [...node.selectedTools, tool];
+      
+      return { ...node, selectedTools: newTools };
+    }));
   };
 
   const handleDocToggle = (nodeId: string, docId: string) => {
-    setStepDocs(prev => {
-      const currentDocs = prev[nodeId] || [];
-      const newDocs = currentDocs.includes(docId)
-        ? currentDocs.filter(d => d !== docId)
-        : [...currentDocs, docId];
-      return { ...prev, [nodeId]: newDocs };
-    });
+    setNodes(nodes.map(node => {
+      if (node.id !== nodeId) return node;
+      
+      const newDocs = node.selectedDocs.includes(docId)
+        ? node.selectedDocs.filter(d => d !== docId)
+        : [...node.selectedDocs, docId];
+      
+      return { ...node, selectedDocs: newDocs };
+    }));
   };
 
   const handlePromptChange = (nodeId: string, prompt: string) => {
-    setStepPrompts(prev => ({ ...prev, [nodeId]: prompt }));
+    setNodes(nodes.map(node => 
+      node.id === nodeId ? { ...node, prompt } : node
+    ));
+  };
+
+  const addLogToNode = (nodeId: string, log: string) => {
+    setNodes(prevNodes => prevNodes.map(node => 
+      node.id === nodeId 
+        ? { ...node, logs: [...node.logs, log] } 
+        : node
+    ));
   };
 
   const handleExecute = () => {
@@ -222,27 +229,18 @@ export default function App() {
       node.id === activeNodeId ? { ...node, status: 'running' } : node
     ));
     
-    setLogs(prev => [
-      ...prev,
-      `> [${activeNode.title}] Starting execution...`,
-    ]);
+    addLogToNode(activeNodeId, `> [${activeNode.title}] Starting execution...`);
 
     setTimeout(() => {
-      setLogs(prev => [
-        ...prev,
-        `> [${activeNode.title}] Processing data with ${stepTools[activeNodeId]?.length || 0} tools...`,
-      ]);
+      addLogToNode(activeNodeId, `> [${activeNode.title}] Processing data with ${activeNode.selectedTools.length} tools...`);
     }, 800);
 
     setTimeout(() => {
-      setLogs(prev => [
-        ...prev,
-        `> [${activeNode.title}] ✓ Execution complete`,
-      ]);
+      addLogToNode(activeNodeId, `> [${activeNode.title}] ✓ Execution complete`);
       setIsExecuting(false);
       setExecutedSteps(prev => new Set([...prev, activeNodeId]));
       
-      setNodes(nodes.map(node =>
+      setNodes(prevNodes => prevNodes.map(node =>
         node.id === activeNodeId ? { ...node, status: 'complete' } : node
       ));
     }, 2500);
@@ -250,10 +248,6 @@ export default function App() {
 
   const handleRunAll = async () => {
     setIsExecuting(true);
-    setLogs(prev => [
-      ...prev,
-      '> [Pipeline] Starting full pipeline execution...',
-    ]);
 
     // Execute each step sequentially
     for (let i = 0; i < nodes.length; i++) {
@@ -266,34 +260,22 @@ export default function App() {
       
       setActiveNodeId(node.id);
       
-      setLogs(prev => [
-        ...prev,
-        `> [${node.title}] Starting execution...`,
-      ]);
+      addLogToNode(node.id, `> [${node.title}] Starting execution...`);
 
       // Simulate processing
       await new Promise(resolve => setTimeout(resolve, 800));
       
-      setLogs(prev => [
-        ...prev,
-        `> [${node.title}] Processing data with ${stepTools[node.id]?.length || 0} tools...`,
-      ]);
+      addLogToNode(node.id, `> [${node.title}] Processing data with ${node.selectedTools.length} tools...`);
 
       if (i > 0) {
         const prevNode = nodes[i - 1];
-        setLogs(prev => [
-          ...prev,
-          `> [${node.title}] Using context from ${prevNode.title}`,
-        ]);
+        addLogToNode(node.id, `> [${node.title}] Using context from ${prevNode.title}`);
       }
 
       // Simulate completion
       await new Promise(resolve => setTimeout(resolve, 1700));
       
-      setLogs(prev => [
-        ...prev,
-        `> [${node.title}] ✓ Execution complete`,
-      ]);
+      addLogToNode(node.id, `> [${node.title}] ✓ Execution complete`);
 
       setExecutedSteps(prev => new Set([...prev, node.id]));
       
@@ -301,11 +283,6 @@ export default function App() {
         n.id === node.id ? { ...n, status: 'complete' } : n
       ));
     }
-
-    setLogs(prev => [
-      ...prev,
-      '> [Pipeline] ✓ All steps completed successfully',
-    ]);
     
     setIsExecuting(false);
   };
@@ -357,10 +334,10 @@ export default function App() {
             activeNode={activeNode}
             previousNode={previousNode}
             stepConfig={stepConfig}
-            selectedTools={stepTools[activeNodeId] || []}
-            selectedDocs={stepDocs[activeNodeId] || []}
-            prompt={stepPrompts[activeNodeId] || ''}
-            logs={logs}
+            selectedTools={activeNode?.selectedTools || []}
+            selectedDocs={activeNode?.selectedDocs || []}
+            prompt={activeNode?.prompt || ''}
+            logs={activeNode?.logs || []}
             onToolToggle={(tool) => handleToolToggle(activeNodeId, tool)}
             onDocToggle={(docId) => handleDocToggle(activeNodeId, docId)}
             onPromptChange={(prompt) => handlePromptChange(activeNodeId, prompt)}

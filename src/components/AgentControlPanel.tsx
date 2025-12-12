@@ -266,7 +266,7 @@ export default function AgentControlPanel({
               <ChevronDown className={`w-4 h-4 transition-transform ${showLogs ? 'rotate-180' : ''}`} />
             </button>
             {showLogs && (
-              <div className="mt-2 bg-slate-900 rounded-lg p-3 max-h-32 overflow-y-auto">
+              <div className="mt-2 bg-slate-900 rounded-lg p-3 max-h-64 overflow-y-auto">
                 {logs.map((log, index) => (
                   <div key={index} className="text-xs text-slate-300 font-mono mb-1">
                     {log}

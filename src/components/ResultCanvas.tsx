@@ -1,6 +1,8 @@
 import { Activity, Loader2, BarChart3, Microscope, TrendingUp, Package, Atom, FileText } from 'lucide-react';
 import { WorkflowNode, StepConfig } from '../App';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ScatterChart, Scatter } from 'recharts';
+import { useEffect, useRef } from 'react';
+import Protein3DViewer from './Protein3DViewer';
 
 interface ResultCanvasProps {
   activeNode?: WorkflowNode;
@@ -142,15 +144,9 @@ function TargetDashboard() {
             <Microscope className="w-4 h-4 text-purple-600" />
             <h4 className="text-sm font-semibold text-slate-900">3D Protein Structure</h4>
           </div>
-          <div className="aspect-square bg-slate-900 rounded-lg flex items-center justify-center">
-            <div className="text-center">
-              <div className="w-20 h-20 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Microscope className="w-10 h-10 text-purple-400" />
-              </div>
-              <p className="text-sm text-slate-300 font-medium">STAT6 Structure</p>
-              <p className="text-xs text-slate-500 mt-1">AlphaFold Model</p>
-              <p className="text-xs text-slate-600 mt-2 font-mono">Confidence: 92.4%</p>
-            </div>
+          <Protein3DViewer pdbUrl="https://files.rcsb.org/download/4hhb.pdb" height="400px" />
+          <div className="mt-3 text-xs text-slate-500">
+            <p>PDB: 4HHB - Hemoglobin</p>
           </div>
         </div>
 
@@ -447,28 +443,27 @@ function StructuralDashboard() {
           </ResponsiveContainer>
         </div>
 
-        {/* Compound Preview */}
+        {/* Compound Preview - 2D Structure */}
         <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 col-span-1">
           <div className="flex items-center gap-2 mb-4">
             <Microscope className="w-4 h-4 text-amber-600" />
-            <h4 className="text-sm font-semibold text-slate-900">Compound Preview</h4>
+            <h4 className="text-sm font-semibold text-slate-900">2D Chemical Structure</h4>
           </div>
-          <div className="aspect-square bg-slate-50 rounded-lg border border-slate-200 flex items-center justify-center mb-3">
-            <div className="text-center p-4">
-              <p className="text-xs text-slate-500 mb-2">2D Structure</p>
-              <div className="w-32 h-32 bg-white rounded border border-slate-300 flex items-center justify-center mx-auto">
-                <Atom className="w-16 h-16 text-slate-300" />
-              </div>
-            </div>
+          <div className="bg-slate-50 rounded-lg border border-slate-200 flex items-center justify-center mb-3 p-2">
+            <img 
+              src="data:image/png;base64,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" 
+              alt="2D Chemical Structure" 
+              className="w-full h-auto rounded"
+            />
           </div>
           <div className="space-y-2 text-xs">
             <div className="flex justify-between">
-              <span className="text-slate-600">Selected:</span>
-              <span className="text-slate-900 font-medium">Drug A</span>
+              <span className="text-slate-600">Compound:</span>
+              <span className="text-slate-900 font-medium">Sample Molecule</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-600">Cluster:</span>
-              <span className="text-blue-700 font-medium">Cluster A</span>
+              <span className="text-slate-600">Type:</span>
+              <span className="text-blue-700 font-medium">Small Molecule</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-600">MW:</span>
@@ -479,6 +474,18 @@ function StructuralDashboard() {
               <span className="text-slate-900">2.8</span>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* 3D Protein Structure Section */}
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Atom className="w-4 h-4 text-amber-600" />
+          <h4 className="text-sm font-semibold text-slate-900">3D Protein Structure (PDB: 4HHB - Hemoglobin)</h4>
+        </div>
+        <Protein3DViewer pdbUrl="https://files.rcsb.org/download/4hhb.pdb" height="500px" />
+        <div className="mt-4 text-xs text-slate-500">
+          <p>Interactive 3D viewer - Click and drag to rotate, scroll to zoom</p>
         </div>
       </div>
     </div>
