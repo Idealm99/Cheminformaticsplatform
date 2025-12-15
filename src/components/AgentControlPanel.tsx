@@ -1,4 +1,4 @@
-import { Play, ChevronDown, Link2, Sparkles, FileText, Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Play, ChevronDown, Link2, Sparkles, FileText, Search, X, ChevronLeft, ChevronRight, Database } from 'lucide-react';
 import { WorkflowNode, StepConfig } from '../App';
 import { useState, useRef, useEffect } from 'react';
 
@@ -32,39 +32,39 @@ export default function AgentControlPanel({
   isExecuting,
 }: AgentControlPanelProps) {
   const [showLogs, setShowLogs] = useState(true);
-  const [docSearch, setDocSearch] = useState('');
-  const [showDocDropdown, setShowDocDropdown] = useState(false);
+  const [dbSearch, setDbSearch] = useState('');
+  const [showDbDropdown, setShowDbDropdown] = useState(false);
   const [showMcpServers, setShowMcpServers] = useState(true);
   const [isCollapsed, setIsCollapsed] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Mock RAG documents from RAG page
-  const ragDocuments = [
-    { id: 'doc1', name: 'STAT6 Pathway Review.pdf', status: 'indexed' },
-    { id: 'doc2', name: 'Clinical Trial Protocol NCT05234567.docx', status: 'indexed' },
-    { id: 'doc3', name: 'Competitor Analysis Report.pdf', status: 'indexed' },
-    { id: 'doc4', name: 'FDA Adverse Events Data.csv', status: 'processing' },
-    { id: 'doc5', name: 'Patent Landscape Analysis.pdf', status: 'indexed' },
+  // Knowledge Databases from RAG page
+  const knowledgeDatabases = [
+    { id: 'db1', name: 'STAT6 Research', description: 'Target validation and pathway analysis', files: 12, color: 'blue' },
+    { id: 'db2', name: 'Competitor Analysis', description: 'Market landscape and competitor drugs', files: 8, color: 'emerald' },
+    { id: 'db3', name: 'Clinical Trials', description: 'FDA data and clinical trial protocols', files: 24, color: 'purple' },
+    { id: 'db4', name: 'Patent Database', description: 'Patent landscapes and IP analysis', files: 15, color: 'orange' },
   ];
 
-  // Filter documents based on search
-  const filteredDocs = ragDocuments.filter(doc => 
-    doc.name.toLowerCase().includes(docSearch.toLowerCase())
+  // Filter databases based on search
+  const filteredDbs = knowledgeDatabases.filter(db => 
+    db.name.toLowerCase().includes(dbSearch.toLowerCase()) ||
+    db.description.toLowerCase().includes(dbSearch.toLowerCase())
   );
 
-  const toggleDoc = (docId: string) => {
-    onDocToggle(docId);
+  const toggleDb = (dbId: string) => {
+    onDocToggle(dbId);
   };
 
-  const removeDoc = (docId: string) => {
-    onDocToggle(docId);
+  const removeDb = (dbId: string) => {
+    onDocToggle(dbId);
   };
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowDocDropdown(false);
+        setShowDbDropdown(false);
       }
     };
 
@@ -73,6 +73,13 @@ export default function AgentControlPanel({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  const colorClasses = {
+    blue: 'bg-blue-500',
+    emerald: 'bg-emerald-500',
+    purple: 'bg-purple-500',
+    orange: 'bg-orange-500',
+  };
 
   if (!activeNode || !stepConfig) {
     return (
@@ -185,11 +192,11 @@ export default function AgentControlPanel({
                 )}
               </div>
 
-              {/* RAG Documents Selection */}
+              {/* RAG Knowledge Databases Selection */}
               <div>
                 <div>
-                  <p className="text-xs font-semibold text-slate-700 uppercase tracking-wider">RAG Documents</p>
-                  <p className="text-xs text-slate-500 mt-0.5">Select documents for analysis</p>
+                  <p className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Knowledge Databases</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Select databases for analysis</p>
                 </div>
                 
                 {/* Search Input with Dropdown */}
@@ -197,24 +204,24 @@ export default function AgentControlPanel({
                   <div className="relative">
                     <input
                       type="text"
-                      value={docSearch}
-                      onChange={(e) => setDocSearch(e.target.value)}
-                      onFocus={() => setShowDocDropdown(true)}
-                      placeholder="Search documents..."
+                      value={dbSearch}
+                      onChange={(e) => setDbSearch(e.target.value)}
+                      onFocus={() => setShowDbDropdown(true)}
+                      placeholder="Search databases..."
                       className="w-full px-3 py-2.5 pr-10 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mt-2"
                     />
                     <Search className="absolute right-3 top-5 w-4 h-4 text-slate-400 pointer-events-none" />
                   </div>
 
                   {/* Dropdown List */}
-                  {showDocDropdown && filteredDocs.length > 0 && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                      {filteredDocs.map((doc) => {
-                        const isSelected = selectedDocs.includes(doc.id);
+                  {showDbDropdown && filteredDbs.length > 0 && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                      {filteredDbs.map((db) => {
+                        const isSelected = selectedDocs.includes(db.id);
                         return (
                           <div
-                            key={doc.id}
-                            onClick={() => toggleDoc(doc.id)}
+                            key={db.id}
+                            onClick={() => toggleDb(db.id)}
                             className={`flex items-center gap-2 px-3 py-2.5 cursor-pointer hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-b-0 ${
                               isSelected ? 'bg-blue-50' : ''
                             }`}
@@ -225,11 +232,14 @@ export default function AgentControlPanel({
                               onChange={() => {}}
                               className="w-3.5 h-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 pointer-events-none"
                             />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-medium text-slate-900 truncate">{doc.name}</p>
-                              <p className="text-xs text-slate-500">{doc.status}</p>
+                            <div className={`w-8 h-8 ${colorClasses[db.color as keyof typeof colorClasses]} rounded-lg flex items-center justify-center flex-shrink-0`}>
+                              <Database className="w-4 h-4 text-white" />
                             </div>
-                            <FileText className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-medium text-slate-900 truncate">{db.name}</p>
+                              <p className="text-xs text-slate-500 truncate">{db.description}</p>
+                            </div>
+                            <span className="text-xs text-slate-500 flex-shrink-0">{db.files} files</span>
                           </div>
                         );
                       })}
@@ -237,21 +247,23 @@ export default function AgentControlPanel({
                   )}
                 </div>
 
-                {/* Selected Documents Tags */}
+                {/* Selected Databases Tags */}
                 {selectedDocs.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1.5">
-                    {selectedDocs.map(docId => {
-                      const doc = ragDocuments.find(d => d.id === docId);
-                      if (!doc) return null;
+                    {selectedDocs.map(dbId => {
+                      const db = knowledgeDatabases.find(d => d.id === dbId);
+                      if (!db) return null;
                       return (
                         <div
-                          key={docId}
+                          key={dbId}
                           className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-blue-50 border border-blue-200 rounded-md text-xs text-blue-900"
                         >
-                          <FileText className="w-3 h-3 flex-shrink-0" />
-                          <span className="font-medium truncate max-w-[200px]">{doc.name}</span>
+                          <div className={`w-4 h-4 ${colorClasses[db.color as keyof typeof colorClasses]} rounded flex items-center justify-center flex-shrink-0`}>
+                            <Database className="w-2.5 h-2.5 text-white" />
+                          </div>
+                          <span className="font-medium truncate max-w-[160px]">{db.name}</span>
                           <button
-                            onClick={() => removeDoc(docId)}
+                            onClick={() => removeDb(dbId)}
                             className="ml-1 hover:bg-blue-100 rounded p-0.5 transition-colors"
                           >
                             <X className="w-3 h-3" />
