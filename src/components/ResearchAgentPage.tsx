@@ -22,84 +22,120 @@ const researchMCPServers = [
 
 // Fixed research workflow steps configuration
 const researchStepConfigs: Record<string, StepConfig> = {
-  literature: {
-    title: 'Literature Search',
+  targetValidation: {
+    title: 'Target Validation',
     contextBadge: 'Research Pipeline Start',
     tools: researchMCPServers,
-    placeholder: 'Enter research topic, keywords, or specific questions...',
-    dashboardType: 'custom',
+    placeholder: 'Enter target identification criteria, disease mechanisms, or molecular pathways...',
+    dashboardType: 'target',
   },
-  extraction: {
-    title: 'Data Extraction',
-    contextBadge: '🔗 Input: Literature Search Results (from Step 1)',
+  compoundDiscovery: {
+    title: 'Compound Discovery',
+    contextBadge: '🔗 Input: Target Validation Results (from Step 1)',
     tools: researchMCPServers,
-    placeholder: 'Specify data extraction criteria (e.g., key findings, methods, results)...',
-    dashboardType: 'custom',
+    placeholder: 'Specify compound screening criteria, chemical properties, or drug-likeness parameters...',
+    dashboardType: 'competitor',
   },
-  analysis: {
-    title: 'Analysis & Synthesis',
-    contextBadge: '🔗 Input: Extracted Data (from Step 2)',
+  pathwayIntegration: {
+    title: 'Pathway Integration',
+    contextBadge: '🔗 Input: Compound Discovery Results (from Step 2)',
     tools: researchMCPServers,
-    placeholder: 'Define analysis parameters (e.g., trends, patterns, correlations)...',
-    dashboardType: 'custom',
+    placeholder: 'Define pathway analysis parameters, interaction networks, or signaling cascades...',
+    dashboardType: 'pathway',
   },
-  report: {
-    title: 'Report Generation',
-    contextBadge: '🔗 Input: Analysis Results (from Step 3)',
+  structureAnalysis: {
+    title: 'Structure Analysis',
+    contextBadge: '🔗 Input: Pathway Integration Results (from Step 3)',
     tools: researchMCPServers,
-    placeholder: 'Specify report format and sections (e.g., executive summary, detailed findings)...',
+    placeholder: 'Specify structural analysis methods, molecular docking, or binding affinity studies...',
+    dashboardType: 'structural',
+  },
+  clinicalSafety: {
+    title: 'Clinical & Safety',
+    contextBadge: '🔗 Input: Structure Analysis Results (from Step 4)',
+    tools: researchMCPServers,
+    placeholder: 'Define clinical trial criteria, safety profiles, or toxicity assessments...',
+    dashboardType: 'clinical',
+  },
+  finalReport: {
+    title: 'Final Report',
+    contextBadge: '🔗 Input: Clinical & Safety Results (from Step 5)',
+    tools: researchMCPServers,
+    placeholder: 'Specify report format, key findings summary, and recommendations...',
     dashboardType: 'custom',
   },
 };
 
 export default function ResearchAgentPage() {
   const [pageState, setPageState] = useState<'input' | 'loading' | 'workflow'>('input');
-  const [researchQuery, setResearchQuery] = useState('Find recent studies on EGFR inhibitors for non-small cell lung cancer treatment, focusing on clinical efficacy and safety profiles from the last 5 years.');
+  const [researchQuery, setResearchQuery] = useState('췌장암에 대한 신약 후보를 찾아줘');
   
   const [nodes, setNodes] = useState<WorkflowNode[]>([
     { 
       id: 'research-1', 
       number: 1, 
-      title: 'Literature Search', 
-      stepType: 'custom', 
+      title: 'Target Validation', 
+      stepType: 'target', 
       status: 'idle', 
-      logs: ['> Research Agent initialized', '> Ready for literature search'], 
+      logs: ['> Research Agent initialized', '> Ready for target validation'], 
       selectedTools: ['PubMed', 'PubChem', 'ClinicalTrials', 'openFDA'], 
       selectedDocs: [], 
-      prompt: '' 
+      prompt: '췌장암에서 KRAS 변이의 발생 빈도와 치료 타겟으로서의 유효성을 검증해줘' 
     },
     { 
       id: 'research-2', 
       number: 2, 
-      title: 'Data Extraction', 
-      stepType: 'custom', 
+      title: 'Compound Discovery', 
+      stepType: 'competitor', 
       status: 'idle', 
       logs: ['> System initialized', '> Awaiting input from Step 1'], 
       selectedTools: ['PubMed', 'PubChem', 'ClinicalTrials', 'openFDA'], 
       selectedDocs: [], 
-      prompt: '' 
+      prompt: 'KRAS G12D 억제제 후보 물질을 스크리닝하고 drug-likeness를 평가해줘' 
     },
     { 
       id: 'research-3', 
       number: 3, 
-      title: 'Analysis & Synthesis', 
-      stepType: 'custom', 
+      title: 'Pathway Integration', 
+      stepType: 'pathway', 
       status: 'idle', 
       logs: ['> System initialized', '> Awaiting input from Step 2'], 
       selectedTools: ['PubMed', 'PubChem', 'ClinicalTrials', 'openFDA'], 
       selectedDocs: [], 
-      prompt: '' 
+      prompt: 'KRAS-RAF-MEK-ERK 신호 전달 경로와 상호작용하는 단백질 네트워크를 분석해줘' 
     },
     { 
       id: 'research-4', 
       number: 4, 
-      title: 'Report Generation', 
-      stepType: 'custom', 
+      title: 'Structure Analysis', 
+      stepType: 'structural', 
       status: 'idle', 
       logs: ['> System initialized', '> Awaiting input from Step 3'], 
       selectedTools: ['PubMed', 'PubChem', 'ClinicalTrials', 'openFDA'], 
       selectedDocs: [], 
-      prompt: '' 
+      prompt: '선별된 화합물의 분자 도킹 및 결합 친화도 분석 해줘' 
+    },
+    { 
+      id: 'research-5', 
+      number: 5, 
+      title: 'Clinical & Safety', 
+      stepType: 'clinical', 
+      status: 'idle', 
+      logs: ['> System initialized', '> Awaiting input from Step 4'], 
+      selectedTools: ['PubMed', 'PubChem', 'ClinicalTrials', 'openFDA'], 
+      selectedDocs: [], 
+      prompt: '췌장암 KRAS 억제제의 임상시험 결과와 독성 프로파일을 종합 분석해줘' 
+    },
+    { 
+      id: 'research-6', 
+      number: 6, 
+      title: 'Final Report', 
+      stepType: 'custom', 
+      status: 'idle', 
+      logs: ['> System initialized', '> Awaiting input from Step 5'], 
+      selectedTools: ['PubMed', 'PubChem', 'ClinicalTrials', 'openFDA'], 
+      selectedDocs: [], 
+      prompt: '전체 연구 결과를 요약하고 신약 개발 전략을 제시해줘' 
     },
   ]);
   
@@ -183,8 +219,8 @@ export default function ResearchAgentPage() {
   
   // Get appropriate config based on step number
   const getStepConfig = (node: WorkflowNode): StepConfig => {
-    const configKeys = ['literature', 'extraction', 'analysis', 'report'];
-    const configKey = configKeys[node.number - 1] || 'literature';
+    const configKeys = ['targetValidation', 'compoundDiscovery', 'pathwayIntegration', 'structureAnalysis', 'clinicalSafety', 'finalReport'];
+    const configKey = configKeys[node.number - 1] || 'targetValidation';
     return researchStepConfigs[configKey];
   };
   
@@ -267,7 +303,7 @@ export default function ResearchAgentPage() {
                 🔄 Automated Pipeline
               </h3>
               <p className="text-xs text-slate-600">
-                4-step workflow: Search → Extract → Analyze → Report
+                6-step workflow: Target Validation → Compound Discovery → Pathway Integration → Structure Analysis → Clinical & Safety → Final Report
               </p>
             </div>
           </div>

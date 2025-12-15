@@ -1,8 +1,16 @@
-import { Activity, Loader2, BarChart3, Microscope, TrendingUp, Package, Atom, FileText, MessageSquare, Send } from 'lucide-react';
+import { Activity, Loader2, BarChart3, Microscope, TrendingUp, Package, Atom, FileText, MessageSquare, Send, RefreshCw, Zap, AlertTriangle } from 'lucide-react';
 import { WorkflowNode, StepConfig } from '../App';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ScatterChart, Scatter } from 'recharts';
 import { useEffect, useRef, useState } from 'react';
 import Protein3DViewer from './Protein3DViewer';
+import compound1 from 'figma:asset/f2ba136790027a724be7bf20a822fb6ad35e3b31.png';
+import compound2 from 'figma:asset/9a9e9004ecddf2e5048c96b63553bce0c4e7c9b5.png';
+import compound3 from 'figma:asset/91967bbdd4d2c47e89bf8e4cfe99077d788f911b.png';
+import compound4 from 'figma:asset/f0036e5950a80bb2d9292c8256cb9728bdfec1fd.png';
+import compound5 from 'figma:asset/84e823a5676badf63bfe9efbfc9fc5909db8b26a.png';
+import compound6 from 'figma:asset/b7d4ca29c9c0c32902bf16a3fef39fcdb726bcbb.png';
+import compound7 from 'figma:asset/1df65c2bd1e0ea1f28201495f2b6f0fab5d0bd11.png';
+import compound8 from 'figma:asset/2dfc0d0d9d689429eab59bc11da03b97358ea262.png';
 
 interface ResultCanvasProps {
   activeNode?: WorkflowNode;
@@ -91,6 +99,18 @@ const patentTimeline = [
   { year: 2021, patents: 42 },
   { year: 2022, patents: 38 },
   { year: 2023, patents: 29 },
+];
+
+// Top Compounds Data for Structural Dashboard
+const topCompounds = [
+  { id: 1, compound: 'Sotorasib (AMG 510)', target: 'KRAS G12C', ic50: '0.2 nM', type: 'Covalent inhibitor', status: 'FDA approved (2021)', structure: compound1 },
+  { id: 2, compound: 'Adagrasib (MRTX849)', target: 'KRAS G12C', ic50: '0.6 nM', type: 'Covalent inhibitor', status: 'FDA approved (2022)', structure: compound2 },
+  { id: 3, compound: 'Trametinib', target: 'MEK1/2', ic50: '0.9 nM', type: 'Allosteric inhibitor', status: 'FDA approved', structure: compound3 },
+  { id: 4, compound: 'Cobimetinib', target: 'MEK1', ic50: '0.9 nM', type: 'Allosteric inhibitor', status: 'FDA approved', structure: compound4 },
+  { id: 5, compound: 'Selumetinib', target: 'MEK1/2', ic50: '14 nM', type: 'Non-ATP competitive', status: 'FDA approved', structure: compound5 },
+  { id: 6, compound: 'Binimetinib', target: 'MEK1/2', ic50: '12 nM', type: 'Allosteric inhibitor', status: 'FDA approved', structure: compound6 },
+  { id: 7, compound: 'Temsirolimus', target: 'mTOR', ic50: '1.8 nM', type: 'mTOR inhibitor', status: 'FDA approved', structure: compound7 },
+  { id: 8, compound: 'Everolimus', target: 'mTOR', ic50: '2.3 nM', type: 'mTOR inhibitor', status: 'FDA approved', structure: compound8 }
 ];
 
 // ============================================
@@ -349,147 +369,88 @@ function CompetitorDashboard() {
 
 function StructuralDashboard() {
   return (
-    <div className="space-y-6">
-      {/* AI Analysis Report */}
-      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-        <div className="flex items-start gap-3 mb-4">
-          <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
-            <Atom className="w-4 h-4 text-amber-600" />
-          </div>
-          <div>
-            <h3 className="text-base font-semibold text-slate-900">Structural Similarity Report</h3>
-            <p className="text-xs text-slate-500 mt-1">Chemical Space Analysis</p>
-          </div>
+    <div className="space-y-4">
+      {/* Top Compounds Grid */}
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold text-slate-900">Top Compounds</h3>
+          <button className="p-1 hover:bg-slate-100 rounded-lg transition-colors">
+            <RefreshCw className="w-3.5 h-3.5 text-slate-600" />
+          </button>
         </div>
 
-        <div className="prose prose-sm max-w-none">
-          <p className="text-sm text-slate-700 leading-relaxed">
-            Structural clustering analysis using <strong>RDKit</strong> molecular fingerprints reveals 
-            <strong> 4 distinct chemical clusters</strong> in the competitive landscape. The compounds 
-            segregate primarily by scaffold type and lipophilicity (LogP range: 2.1-8.5).
-          </p>
-
-          <p className="text-sm text-slate-700 leading-relaxed mt-3">
-            <strong>Cluster A</strong> (3 compounds, top-left): Hydrophilic small molecules with 
-            heterocyclic cores. These show moderate STAT6 inhibition (IC50 10-50 nM) but excellent 
-            oral bioavailability (&gt;60%). <strong>Cluster B</strong> (3 compounds, top-right): 
-            Lipophilic aryl sulfonamides with high potency (IC50 &lt;10 nM) but CNS penetration concerns.
-          </p>
-
-          <p className="text-sm text-slate-700 leading-relaxed mt-3">
-            The t-SNE projection suggests an unexplored chemical space in the <strong>mid-lipophilicity 
-            region (LogP 4-5)</strong> between Clusters A and C, representing a potential opportunity 
-            for balanced potency and ADME properties.
-          </p>
-        </div>
-
-        <div className="mt-4 pt-4 border-t border-slate-200 flex items-center gap-2 text-xs text-slate-500">
-          <span className="px-2 py-1 bg-amber-50 text-amber-700 rounded border border-amber-200">RDKit</span>
+        {/* Grid of Compound Cards */}
+        <div className="grid grid-cols-4 gap-2.5">
+          {topCompounds.map((item) => (
+            <div key={item.id} className="bg-white rounded-lg border border-slate-200 p-2.5 hover:border-blue-300 transition-colors">
+              {/* 2D Structure Image */}
+              <div className="aspect-square bg-slate-800 rounded-lg mb-2 flex items-center justify-center border border-slate-700">
+                {item.structure ? (
+                  <img 
+                    src={item.structure} 
+                    alt={`${item.compound} structure`}
+                    className="w-full h-full object-contain p-1.5"
+                  />
+                ) : (
+                  <div className="text-xs text-slate-400 text-center p-2">
+                    Structure<br/>Coming Soon
+                  </div>
+                )}
+              </div>
+              
+              {/* Compound Info */}
+              <div className="space-y-0.5">
+                <h4 className="text-xs font-semibold text-slate-900 truncate" title={item.compound}>
+                  {item.compound}
+                </h4>
+                <div className="flex items-center gap-1">
+                  <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-[10px] font-medium">
+                    {item.target}
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-600">IC₅₀: {item.ic50}</p>
+                <p className="text-[10px] text-slate-500 truncate" title={item.type}>{item.type}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Visual Dashboard */}
-      <div className="grid grid-cols-3 gap-6">
-        {/* Scatter Plot */}
-        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 col-span-2">
-          <div className="flex items-center gap-2 mb-4">
-            <Atom className="w-4 h-4 text-amber-600" />
-            <h4 className="text-sm font-semibold text-slate-900">Chemical Space (t-SNE)</h4>
-          </div>
-          <ResponsiveContainer width="100%" height={340}>
-            <ScatterChart>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis 
-                type="number" 
-                dataKey="x" 
-                name="t-SNE 1" 
-                tick={{ fontSize: 11, fill: '#64748b' }}
-                domain={[0, 10]}
-              />
-              <YAxis 
-                type="number" 
-                dataKey="y" 
-                name="t-SNE 2" 
-                tick={{ fontSize: 11, fill: '#64748b' }}
-                domain={[0, 10]}
-              />
-              <Tooltip 
-                cursor={{ strokeDasharray: '3 3' }}
-                contentStyle={{ 
-                  backgroundColor: '#fff', 
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  fontSize: '12px'
-                }}
-              />
-              <Scatter 
-                data={chemicalSpaceData.filter(d => d.cluster === 'A')} 
-                fill="#3b82f6" 
-                name="Cluster A"
-              />
-              <Scatter 
-                data={chemicalSpaceData.filter(d => d.cluster === 'B')} 
-                fill="#10b981" 
-                name="Cluster B"
-              />
-              <Scatter 
-                data={chemicalSpaceData.filter(d => d.cluster === 'C')} 
-                fill="#f59e0b" 
-                name="Cluster C"
-              />
-              <Scatter 
-                data={chemicalSpaceData.filter(d => d.cluster === 'D')} 
-                fill="#ef4444" 
-                name="Cluster D"
-              />
-              <Legend wrapperStyle={{ fontSize: '11px' }} />
-            </ScatterChart>
-          </ResponsiveContainer>
+      {/* Top Compounds Table */}
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold text-slate-900">Top Compounds</h3>
         </div>
-
-        {/* Compound Preview - 2D Structure */}
-        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 col-span-1">
-          <div className="flex items-center gap-2 mb-4">
-            <Microscope className="w-4 h-4 text-amber-600" />
-            <h4 className="text-sm font-semibold text-slate-900">2D Chemical Structure</h4>
-          </div>
-          <div className="bg-slate-50 rounded-lg border border-slate-200 flex items-center justify-center mb-3 p-2">
-            <img 
-              src="data:image/png;base64,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" 
-              alt="2D Chemical Structure" 
-              className="w-full h-auto rounded"
-            />
-          </div>
-          <div className="space-y-2 text-xs">
-            <div className="flex justify-between">
-              <span className="text-slate-600">Compound:</span>
-              <span className="text-slate-900 font-medium">Sample Molecule</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-600">Type:</span>
-              <span className="text-blue-700 font-medium">Small Molecule</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-600">MW:</span>
-              <span className="text-slate-900">342.4 g/mol</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-600">LogP:</span>
-              <span className="text-slate-900">2.8</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 3D Protein Structure Section */}
-      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Atom className="w-4 h-4 text-amber-600" />
-          <h4 className="text-sm font-semibold text-slate-900">3D Protein Structure (PDB: 4HHB - Hemoglobin)</h4>
-        </div>
-        <Protein3DViewer pdbUrl="https://files.rcsb.org/download/4hhb.pdb" height="500px" />
-        <div className="mt-4 text-xs text-slate-500">
-          <p>Interactive 3D viewer - Click and drag to rotate, scroll to zoom</p>
+        
+        <div className="overflow-hidden">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-slate-200">
+                <th className="text-left py-2 text-slate-600 font-semibold">Compound</th>
+                <th className="text-left py-2 text-slate-600 font-semibold">Target</th>
+                <th className="text-left py-2 text-slate-600 font-semibold">IC₅₀</th>
+                <th className="text-left py-2 text-slate-600 font-semibold">Type</th>
+                <th className="text-left py-2 text-slate-600 font-semibold">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {topCompounds.map((item, idx) => (
+                <tr key={item.id} className="border-b border-slate-100 last:border-0">
+                  <td className="py-2 text-slate-900 font-medium">
+                    {item.compound}
+                    {idx < 3 && (
+                      <span className="ml-2 text-blue-600 font-semibold">→ 다음 단계</span>
+                    )}
+                  </td>
+                  <td className="py-2 text-slate-700">{item.target}</td>
+                  <td className="py-2 text-slate-700">{item.ic50}</td>
+                  <td className="py-2 text-slate-700">{item.type}</td>
+                  <td className="py-2 text-slate-700">{item.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -765,22 +726,22 @@ export default function ResultCanvas({ activeNode, stepConfig, isExecuted, isExe
         )}
 
         {/* Prompt Input - Fixed below Query */}
-        <div className="border-b border-slate-200 bg-white p-4">
-          <div className="flex gap-3">
+        <div className="border-b border-slate-200 bg-white p-2.5">
+          <div className="flex gap-2">
             <textarea
               value={prompt}
               onChange={(e) => onPromptChange(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={stepConfig?.placeholder || 'Enter analysis parameters...'}
-              rows={3}
-              className="flex-1 px-3 py-2.5 bg-slate-50 border-0 focus:bg-white rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition-colors"
+              rows={1}
+              className="flex-1 px-2.5 py-1.5 bg-slate-50 border-0 focus:bg-white rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition-colors"
             />
             <button
               onClick={handleSubmit}
               disabled={!prompt.trim() || isExecuting}
-              className="px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-lg flex items-center justify-center transition-all flex-shrink-0 disabled:cursor-not-allowed"
+              className="px-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-lg flex items-center justify-center transition-all flex-shrink-0 disabled:cursor-not-allowed"
             >
-              <Send className="w-5 h-5" />
+              <Send className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -805,14 +766,14 @@ export default function ResultCanvas({ activeNode, stepConfig, isExecuted, isExe
       <div className="flex-1 bg-slate-50 flex flex-col overflow-hidden">
         {/* Research Query Header - Fixed */}
         {researchQuery && (
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200 p-6">
-            <div className="flex items-start gap-3">
-              <MessageSquare className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200 p-3">
+            <div className="flex items-start gap-2">
+              <MessageSquare className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
               <div className="flex-1 min-w-0">
-                <h4 className="text-xs font-semibold text-blue-900 uppercase tracking-wider mb-2">
+                <h4 className="text-xs font-semibold text-blue-900 uppercase tracking-wider mb-1">
                   Research Query
                 </h4>
-                <p className="text-lg text-blue-900 leading-relaxed font-medium">
+                <p className="text-sm text-blue-900 leading-snug font-medium">
                   {researchQuery}
                 </p>
               </div>
@@ -821,22 +782,22 @@ export default function ResultCanvas({ activeNode, stepConfig, isExecuted, isExe
         )}
 
         {/* Prompt Input - Fixed below Query */}
-        <div className="border-b border-slate-200 bg-white p-4">
-          <div className="flex gap-3">
+        <div className="border-b border-slate-200 bg-white p-2.5">
+          <div className="flex gap-2">
             <textarea
               value={prompt}
               onChange={(e) => onPromptChange(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={stepConfig?.placeholder || 'Enter analysis parameters...'}
-              rows={3}
-              className="flex-1 px-3 py-2.5 bg-slate-50 border-0 focus:bg-white rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition-colors"
+              rows={2}
+              className="flex-1 px-2.5 py-2 bg-slate-50 border-0 focus:bg-white rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition-colors"
             />
             <button
               onClick={handleSubmit}
               disabled={!prompt.trim()}
-              className="px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-lg flex items-center justify-center transition-all flex-shrink-0 disabled:cursor-not-allowed"
+              className="px-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-lg flex items-center justify-center transition-all flex-shrink-0 disabled:cursor-not-allowed"
             >
-              <Send className="w-5 h-5" />
+              <Send className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -878,14 +839,14 @@ export default function ResultCanvas({ activeNode, stepConfig, isExecuted, isExe
     <div className="flex-1 bg-slate-50 flex flex-col overflow-hidden">
       {/* Research Query Header - Fixed */}
       {researchQuery && (
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200 p-6">
-          <div className="flex items-start gap-3">
-            <MessageSquare className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200 p-3">
+          <div className="flex items-start gap-2">
+            <MessageSquare className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
-              <h4 className="text-xs font-semibold text-blue-900 uppercase tracking-wider mb-2">
+              <h4 className="text-xs font-semibold text-blue-900 uppercase tracking-wider mb-1">
                 Research Query
               </h4>
-              <p className="text-lg text-blue-900 leading-relaxed font-medium">
+              <p className="text-sm text-blue-900 leading-snug font-medium">
                 {researchQuery}
               </p>
             </div>
@@ -894,22 +855,22 @@ export default function ResultCanvas({ activeNode, stepConfig, isExecuted, isExe
       )}
 
       {/* Prompt Input - Fixed below Query */}
-      <div className="border-b border-slate-200 bg-white p-4">
-        <div className="flex gap-3">
+      <div className="border-b border-slate-200 bg-white p-2.5">
+        <div className="flex gap-2">
           <textarea
             value={prompt}
             onChange={(e) => onPromptChange(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={stepConfig?.placeholder || 'Enter analysis parameters...'}
-            rows={3}
-            className="flex-1 px-3 py-2.5 bg-slate-50 border-0 focus:bg-white rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition-colors"
+            rows={1}
+            className="flex-1 px-2.5 py-1.5 bg-slate-50 border-0 focus:bg-white rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition-colors"
           />
           <button
             onClick={handleSubmit}
             disabled={!prompt.trim() || isExecuting}
-            className="px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-lg flex items-center justify-center transition-all flex-shrink-0 disabled:cursor-not-allowed"
+            className="px-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-lg flex items-center justify-center transition-all flex-shrink-0 disabled:cursor-not-allowed"
           >
-            <Send className="w-5 h-5" />
+            <Send className="w-4 h-4" />
           </button>
         </div>
       </div>

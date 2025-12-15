@@ -1,4 +1,4 @@
-import { Plus, Trash2, Circle, CheckCircle2, FlaskConical, Pill, Atom, FileText, Loader2, ArrowDown, Trophy } from 'lucide-react';
+import { Plus, Trash2, Circle, CheckCircle2, FlaskConical, Pill, Atom, FileText, Loader2, ArrowDown, Trophy, Network } from 'lucide-react';
 import { WorkflowNode } from '../App';
 import { useState } from 'react';
 
@@ -9,7 +9,7 @@ interface WorkflowEditorProps {
   onAddNode: (afterIndex: number) => void;
   onDeleteNode: (nodeId: string) => void;
   onUpdateNodeTitle: (nodeId: string, newTitle: string) => void;
-  onChangeStepType: (nodeId: string, newType: 'target' | 'competitor' | 'structural' | 'clinical' | 'custom') => void;
+  onChangeStepType: (nodeId: string, newType: 'target' | 'competitor' | 'structural' | 'clinical' | 'pathway' | 'custom') => void;
   isResearchMode?: boolean; // Optional flag to disable editing controls
 }
 
@@ -18,6 +18,7 @@ const stepTypeIcons = {
   competitor: Pill,
   structural: Atom,
   clinical: FileText,
+  pathway: Network,
   custom: Circle,
 };
 
@@ -58,7 +59,7 @@ export default function WorkflowEditor({
       </div>
 
       {/* Workflow Nodes */}
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto p-4 max-w-xs">
         <div className="space-y-3">
           {/* STEP Header */}
           <div className="text-center mb-4">
@@ -76,7 +77,7 @@ export default function WorkflowEditor({
                   onMouseEnter={() => setHoveredNodeId(node.id)}
                   onMouseLeave={() => setHoveredNodeId(null)}
                   onClick={() => onNodeClick(node.id)}
-                  className={`relative group cursor-pointer transition-all rounded-lg p-4 border ${
+                  className={`relative group cursor-pointer transition-all rounded-md p-1.5 border ${
                     isLastNode && node.status === 'complete'
                       ? 'bg-white border-amber-300 shadow-md ring-2 ring-amber-200'
                       : isLastNode
@@ -86,60 +87,60 @@ export default function WorkflowEditor({
                       : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-sm'
                   }`}
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-1.5">
                     {/* Status Icon */}
                     <div className="flex-shrink-0 mt-0.5">
                       {node.status === 'running' ? (
-                        <Loader2 className={`w-5 h-5 animate-spin ${isLastNode ? 'text-purple-600' : 'text-blue-600'}`} />
+                        <Loader2 className={`w-3.5 h-3.5 animate-spin ${isLastNode ? 'text-purple-600' : 'text-blue-600'}`} />
                       ) : node.status === 'complete' && isLastNode ? (
-                        <Trophy className="w-5 h-5 text-amber-600" />
+                        <Trophy className="w-3.5 h-3.5 text-amber-600" />
                       ) : node.status === 'complete' ? (
-                        <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
                       ) : node.id === activeNodeId ? (
-                        <div className={`w-5 h-5 rounded-full ${isLastNode ? 'bg-purple-600' : 'bg-blue-600'} flex items-center justify-center`}>
-                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        <div className={`w-3.5 h-3.5 rounded-full ${isLastNode ? 'bg-purple-600' : 'bg-blue-600'} flex items-center justify-center`}>
+                          <div className="w-1 h-1 bg-white rounded-full"></div>
                         </div>
                       ) : (
-                        <Circle className="w-5 h-5 text-slate-300" />
+                        <Circle className="w-3.5 h-3.5 text-slate-300" />
                       )}
                     </div>
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-1 flex-wrap">
                         {/* Final Report Badge */}
                         {isLastNode && (
-                          <span className="px-2 py-0.5 bg-gradient-to-r from-amber-100 to-yellow-100 border border-amber-300 rounded text-xs font-semibold text-amber-800">
-                            ✨ Final Report
+                          <span className="px-1 py-0.5 bg-gradient-to-r from-amber-100 to-yellow-100 border border-amber-300 rounded text-xs font-semibold text-amber-800">
+                            ✨
                           </span>
                         )}
                         
                         {/* Step Type Badge */}
                         {!isLastNode && (
-                          <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-xs ${
+                          <div className={`flex items-center gap-0.5 px-1 py-0.5 rounded text-xs ${
                             node.stepType === 'target' ? 'bg-purple-50 text-purple-700 border border-purple-200' :
                             node.stepType === 'competitor' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
                             node.stepType === 'structural' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
                             node.stepType === 'clinical' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
+                            node.stepType === 'pathway' ? 'bg-green-50 text-green-700 border border-green-200' :
                             'bg-slate-50 text-slate-700 border border-slate-200'
                           }`}>
-                            <StepIcon className="w-3 h-3" />
-                            <span className="capitalize">{node.stepType}</span>
+                            <StepIcon className="w-2.5 h-2.5" />
                           </div>
                         )}
 
                         {node.status === 'running' && (
-                          <span className={`px-2 py-0.5 border rounded text-xs ${
+                          <span className={`px-1 py-0.5 border rounded text-xs ${
                             isLastNode 
                               ? 'bg-purple-100 border-purple-200 text-purple-700'
                               : 'bg-blue-100 border-blue-200 text-blue-700'
                           }`}>
-                            Running...
+                            •
                           </span>
                         )}
                         {node.id === activeNodeId && node.status !== 'running' && !isLastNode && (
-                          <span className="px-2 py-0.5 bg-blue-100 border border-blue-200 rounded text-xs text-blue-700">
-                            Active
+                          <span className="px-1 py-0.5 bg-blue-100 border border-blue-200 rounded text-xs text-blue-700">
+                            •
                           </span>
                         )}
                       </div>
@@ -160,7 +161,7 @@ export default function WorkflowEditor({
                           }}
                           onClick={(e) => e.stopPropagation()}
                           autoFocus
-                          className="w-full text-sm text-slate-900 mt-1 bg-transparent border-b border-blue-400 focus:outline-none"
+                          className="w-full text-xs text-slate-900 mt-0.5 bg-transparent border-b border-blue-400 focus:outline-none"
                         />
                       ) : (
                         <h3
@@ -168,7 +169,7 @@ export default function WorkflowEditor({
                             e.stopPropagation();
                             if (!isResearchMode) handleStartEdit(node);
                           }}
-                          className={`text-sm text-slate-900 mt-1 ${!isResearchMode ? 'cursor-text hover:text-blue-600' : ''} transition-colors`}
+                          className={`text-xs text-slate-900 mt-0.5 leading-tight ${!isResearchMode ? 'cursor-text hover:text-blue-600' : ''} transition-colors`}
                         >
                           {node.title}
                         </h3>
@@ -176,8 +177,8 @@ export default function WorkflowEditor({
 
                       {/* Step Type Selector (show on hover/active) */}
                       {!isResearchMode && !isLastNode && (hoveredNodeId === node.id || node.id === activeNodeId) && editingNodeId !== node.id && (
-                        <div className="mt-2 flex gap-1">
-                          {(['target', 'competitor', 'structural', 'clinical', 'custom'] as const).map((type) => {
+                        <div className="mt-1 flex gap-0.5">
+                          {(['target', 'competitor', 'structural', 'clinical', 'pathway', 'custom'] as const).map((type) => {
                             const Icon = stepTypeIcons[type];
                             return (
                               <button
@@ -186,14 +187,14 @@ export default function WorkflowEditor({
                                   e.stopPropagation();
                                   onChangeStepType(node.id, type);
                                 }}
-                                className={`p-1 rounded border transition-all ${
+                                className={`p-0.5 rounded border transition-all ${
                                   node.stepType === type
                                     ? 'bg-blue-100 border-blue-300 text-blue-700'
                                     : 'bg-slate-50 border-slate-200 text-slate-500 hover:border-slate-300'
                                 }`}
                                 title={type}
                               >
-                                <Icon className="w-3 h-3" />
+                                <Icon className="w-2.5 h-2.5" />
                               </button>
                             );
                           })}
@@ -208,9 +209,9 @@ export default function WorkflowEditor({
                           e.stopPropagation();
                           onDeleteNode(node.id);
                         }}
-                        className="flex-shrink-0 p-1.5 bg-red-50 hover:bg-red-100 border border-red-200 rounded transition-colors"
+                        className="flex-shrink-0 p-0.5 bg-red-50 hover:bg-red-100 border border-red-200 rounded transition-colors"
                       >
-                        <Trash2 className="w-4 h-4 text-red-600" />
+                        <Trash2 className="w-3 h-3 text-red-600" />
                       </button>
                     )}
                   </div>
@@ -218,19 +219,19 @@ export default function WorkflowEditor({
 
                 {/* Connector + Add Button */}
                 {index < nodes.length - 1 && (
-                  <div className="flex items-center justify-center my-3 relative h-8">
+                  <div className="flex items-center justify-center my-2 relative h-6">
                     {/* Vertical Line */}
                     <div className={`absolute w-0.5 h-full transition-colors ${
                       node.status === 'complete' ? 'bg-emerald-300' : 'bg-slate-200'
                     }`}></div>
 
                     {/* Arrow Icon */}
-                    <div className={`relative z-10 w-7 h-7 rounded-full flex items-center justify-center transition-all ${
+                    <div className={`relative z-10 w-6 h-6 rounded-full flex items-center justify-center transition-all ${
                       node.status === 'complete' 
                         ? 'bg-emerald-100 border border-emerald-300' 
                         : 'bg-white border border-slate-200'
                     }`}>
-                      <ArrowDown className={`w-4 h-4 transition-colors ${
+                      <ArrowDown className={`w-3.5 h-3.5 transition-colors ${
                         node.status === 'complete' ? 'text-emerald-600' : 'text-slate-400'
                       }`} />
                     </div>

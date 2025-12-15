@@ -40,10 +40,10 @@ export default function AgentControlPanel({
 
   // Knowledge Databases from RAG page
   const knowledgeDatabases = [
-    { id: 'db1', name: 'STAT6 Research', description: 'Target validation and pathway analysis', files: 12, color: 'blue' },
-    { id: 'db2', name: 'Competitor Analysis', description: 'Market landscape and competitor drugs', files: 8, color: 'emerald' },
-    { id: 'db3', name: 'Clinical Trials', description: 'FDA data and clinical trial protocols', files: 24, color: 'purple' },
-    { id: 'db4', name: 'Patent Database', description: 'Patent landscapes and IP analysis', files: 15, color: 'orange' },
+    { id: 'db1', name: 'Bio-Literature Index', description: 'PubMed, 논문, 학술지 등 텍스트 기반의 연구 자료를 모아둔 벡터 저장소. 타겟 단백질의 기전이나 최신 연구 동향 검색.', files: 12, color: 'blue' },
+    { id: 'db2', name: 'ChemSpace Vector', description: 'SMILES, 화합물 구조, 물성 데이터 등을 임베딩하여 저장. 유사 구조 검색, 약물성 평가 데이터.', files: 8, color: 'emerald' },
+    { id: 'db3', name: 'IP-Intelligence Store', description: 'Google Patents, 유료 특허 DB 등의 특허 문서와 청구항을 벡터화. FTO 분석, 특허 회피 설계.', files: 24, color: 'purple' },
+    { id: 'db4', name: 'Clinical-Evidence Hub', description: 'ClinicalTrials.gov, FDA/EMA 승인 문서, 임상 결과 보고서. 임상 단계 파악, 부작용 사례 검색.', files: 15, color: 'orange' },
   ];
 
   // Filter databases based on search

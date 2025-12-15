@@ -12,7 +12,7 @@ export interface WorkflowNode {
   id: string;
   number: number;
   title: string;
-  stepType: 'target' | 'competitor' | 'structural' | 'clinical' | 'custom';
+  stepType: 'target' | 'competitor' | 'structural' | 'clinical' | 'pathway' | 'custom';
   status: 'idle' | 'running' | 'complete';
   logs: string[];
   selectedTools: string[];
@@ -25,7 +25,7 @@ export interface StepConfig {
   contextBadge: string;
   tools: Array<{ id: string; name: string; description: string; defaultChecked: boolean }>;
   placeholder: string;
-  dashboardType: 'target' | 'competitor' | 'structural' | 'clinical' | 'custom';
+  dashboardType: 'target' | 'competitor' | 'structural' | 'clinical' | 'pathway' | 'custom';
 }
 
 // Global MCP Server list - same for all steps
@@ -75,6 +75,13 @@ export const stepConfigs: Record<string, StepConfig> = {
     })),
     placeholder: 'Enter search criteria (e.g., therapeutic area, indication)...',
     dashboardType: 'clinical',
+  },
+  pathway: {
+    title: 'Pathway Analysis',
+    contextBadge: '🔗 Input: Data from previous step',
+    tools: mcpServers,
+    placeholder: 'Enter pathway analysis parameters...',
+    dashboardType: 'pathway',
   },
   custom: {
     title: 'Custom Analysis',
@@ -163,7 +170,7 @@ export default function App() {
     ));
   };
 
-  const handleChangeStepType = (nodeId: string, newType: 'target' | 'competitor' | 'structural' | 'clinical' | 'custom') => {
+  const handleChangeStepType = (nodeId: string, newType: 'target' | 'competitor' | 'structural' | 'clinical' | 'pathway' | 'custom') => {
     const config = stepConfigs[newType];
     const defaultTools = config.tools.filter(t => t.defaultChecked).map(t => t.id);
     

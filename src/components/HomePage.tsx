@@ -21,15 +21,6 @@ export default function HomePage() {
       iconBg: 'bg-emerald-50'
     },
     { 
-      icon: Bell, 
-      value: '5', 
-      label: 'New Alerts', 
-      trend: 'Requires Attention', 
-      trendUp: null,
-      iconColor: 'text-amber-500',
-      iconBg: 'bg-amber-50'
-    },
-    { 
       icon: TrendingUp, 
       value: '34%', 
       label: 'Success Rate', 
@@ -125,7 +116,7 @@ export default function HomePage() {
         </div>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-3 gap-4 mb-8">
           {kpiCards.map((card, index) => {
             const Icon = card.icon;
             return (

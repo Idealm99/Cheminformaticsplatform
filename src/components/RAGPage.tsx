@@ -8,8 +8,8 @@ export default function RAGPage() {
   const databases = [
     { 
       id: 1, 
-      name: 'STAT6 Research', 
-      description: 'Target validation and pathway analysis',
+      name: 'Bio-Literature Index', 
+      description: 'PubMed, 논문, 학술지 등 텍스트 기반의 연구 자료를 모아둔 벡터 저장소. 타겟 단백질의 기전이나 최신 연구 동향 검색.',
       files: 12, 
       size: '24.5 GB', 
       created: '2 weeks ago',
@@ -17,8 +17,8 @@ export default function RAGPage() {
     },
     { 
       id: 2, 
-      name: 'Competitor Analysis', 
-      description: 'Market landscape and competitor drugs',
+      name: 'ChemSpace Vector', 
+      description: 'SMILES, 화합물 구조, 물성 데이터 등을 임베딩하여 저장. 유사 구조 검색, 약물성 평가 데이터.',
       files: 8, 
       size: '15.2 GB', 
       created: '1 month ago',
@@ -26,8 +26,8 @@ export default function RAGPage() {
     },
     { 
       id: 3, 
-      name: 'Clinical Trials', 
-      description: 'FDA data and clinical trial protocols',
+      name: 'IP-Intelligence Store', 
+      description: 'Google Patents, 유료 특허 DB 등의 특허 문서와 청구항을 벡터화. FTO 분석, 특허 회피 설계.',
       files: 24, 
       size: '48.7 GB', 
       created: '3 weeks ago',
@@ -35,8 +35,8 @@ export default function RAGPage() {
     },
     { 
       id: 4, 
-      name: 'Patent Database', 
-      description: 'Patent landscapes and IP analysis',
+      name: 'Clinical-Evidence Hub', 
+      description: 'ClinicalTrials.gov, FDA/EMA 승인 문서, 임상 결과 보고서. 임상 단계 파악, 부작용 사례 검색.',
       files: 15, 
       size: '32.1 GB', 
       created: '1 week ago',
